@@ -1,0 +1,197 @@
+.rotate(@x: 0, @y: 0, @z: 0, @angle: 0deg) {
+  -moz-transform: rotate3d(@x, @y, @z, @angle);
+  -webkit-transform: rotate3d(@x, @y, @z, @angle);
+  -o-transform: rotate3d(@x, @y, @z, @angle);
+  -ms-transform: rotate3d(@x, @y, @z, @angle);
+  transform: rotate3d(@x, @y, @z, @angle);
+}
+
+.scale(@x: 1, @y: 1, @z: 1) {
+  -moz-transform: scale3d(@x, @y, @z);
+  -webkit-transform: scale3d(@x, @y, @z);
+  -o-transform: scale3d(@x, @y, @z);
+  -ms-transform: scale3d(@x, @y, @z);
+  transform: scale3d(@x, @y, @z);
+}
+
+.translate(@x: 0, @y: 0, @z: 0) {
+  -moz-transform: translate3d(@x, @y, @z);
+  -webkit-transform: translate3d(@x, @y, @z);
+  -o-transform: translate3d(@x, @y, @z);
+  -ms-transform: translate3d(@x, @y, @z);
+  transform: translate3d(@x, @y, @z);
+}
+
+.scaleAndTranslate(@tx: 0, @ty: 0, @tz: 0, @sx: 1, @sy: 1) {
+  -moz-transform: translate(@tx, @ty) scale(@sx, @sy);
+  /**
+   * In older webkits on android, this causes the whole page to jump up and down
+   * when typing, in input fields
+   */
+  -webkit-transform: translate3d(@tx, @ty, @tz) scale(@sx, @sy);
+  // -webkit-transform: translate(@x, @y) scale(@sx, @sy);
+  -o-transform: translate(@tx, @ty) scale(@sx, @sy);
+  -ms-transform: translate3d(@tx, @ty, @tz) scale(@sx, @sy);
+  transform: translate3d(@tx, @ty, @tz) scale(@sx, @sy);
+}
+
+.transformNone {
+  -moz-transform: none;
+  -webkit-transform: none;
+  -o-transform: none;
+  -ms-transform: none;
+  transform: none;
+}
+
+.transition-transform(@time: 200ms, @anim: ease, @delay: 0ms) {
+  -moz-transition: -moz-transform @time @anim @delay;
+  -webkit-transition: -webkit-transform @time @anim @delay;
+  -o-transition: -o-transform @time @anim @delay;
+  -ms-transition: -ms-transform @time @anim @delay;
+  transition: transform @time @anim @delay;
+}
+
+.transition-prop(@prop, @time: 200ms, @anim: ease, @delay: 0ms) {
+  -moz-transition: @prop @time @anim @delay;
+  -webkit-transition: @prop @time @anim @delay;
+  -o-transition: @prop @time @anim @delay;
+  -ms-transition: @prop @time @anim @delay;
+  transition: @prop @time @anim @delay;
+}
+
+
+.stage-viewport {
+  min-width: 100px;
+  min-height: 100px;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  
+  &.view-transitioning {
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+.stage-view {
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  min-height: 100%;
+   
+  will-change: transform;
+  transform: translateZ(0);
+  display: none;
+  /* Avoid flickering in webkit browsers, thanks stackoverflow */
+  // -webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
+  
+  &.showing {
+    z-index: 99 !important;
+    display: block !important;
+  }
+  
+}
+
+/* ---------------------------- Slide transition for views ---------------------------- */
+.slide {
+  .stage-view {
+    .translate(100%);
+    .transition-transform(600ms, cubic-bezier(0.19, 1, 0.22, 1));
+    
+    &.pop {
+      .translate(100%);
+    }
+
+    /* For view transitions */
+    &.in {
+      .transformNone;
+    }
+
+    &.stack {
+      z-index: 98;
+      .translate(-60%);
+      .transition-transform(750ms, cubic-bezier(0.19, 1, 0.22, 1));
+    }
+  }
+}  
+  
+/* ---------------------------- Slide transition for views ---------------------------- */
+.fade {
+  .stage-view {
+    opacity: 0;
+
+    -moz-transition: opacity 250ms ease;
+    -webkit-transition: opacity 250ms ease;
+    -o-transition: opacity 250ms ease;
+    -ms-transition: opacity 250ms ease;
+    transition: opacity 250ms ease;
+
+    &.pop {
+      opacity: 0;
+    }
+    &.in {
+      opacity: 1;
+    }
+    &.stack {
+      z-index: 98;
+      opacity: 0;
+    }
+  }
+}
+
+.fancy {
+  .stage-view {
+    .scaleAndTranslate(100%);
+    .transition-transform(600ms, cubic-bezier(0.19, 1, 0.22, 1));
+
+    &.pop {
+      .translate(100%);
+    }
+    &.in {
+      .transformNone;
+    }
+    &.stack {
+      z-index: 98;
+      .scaleAndTranslate(-70%, 0, 0, 0.8, 0.8);
+      .transition-transform(750ms, cubic-bezier(0.19, 1, 0.22, 1));
+    }
+  }
+}
+
+
+.lollipop {
+  .stage-view {
+    opacity: 0;
+    .translate(0, 80px);
+    -moz-transition: -moz-transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
+    -webkit-transition: -webkit-transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
+    -o-transition: -o-transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
+    -ms-transition: -ms-transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
+    transition: transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
+
+    &.pop {
+      // .translate(0, 10%);
+      // opacity: 0;
+    }
+
+    &.in {
+      // .translateY(0); Fixed position elements won't work with this
+      .transformNone;
+      opacity: 1;
+    }
+
+    &.stack {
+      // for accurate lollipop emulation, disable below
+      .translate(0, -50px);
+      
+      opacity: 1;
+      // for accurate lollipop emulation, enable below
+      // opacity: 0.8;
+    }
+  }
+}

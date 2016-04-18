@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="480" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <meta http-equiv="cleartype" content="on" />
+
+    <link rel="stylesheet" type="text/css" href="css/stage.css" />
+    <style>
+      body {
+        font-family: sans-serif;
+        font-size: 1em;
+      }
+      #viewPort {
+        background-color: #333;
+        position: absolute;
+        /*
+        width: 60%;
+        height: 500px;
+        top: 5%;
+        left: 20%;
+        */
+        width: 100%;
+        min-height: 100%;
+        /*height: 600px;*/
+        top: 0;
+        left: 0;
+      }
+      #actionbar {
+        position: fixed;
+        width: 100%;
+        box-sizing: border-box;
+        bottom: 0;
+        left: 0;
+        background-color: #456;
+        color: #fff;
+        padding: 15px;
+        font-weight: bold;
+        font-size: 1.1em;
+        border-bottom: 3px solid rgba(0,0,0,0.3);
+        z-index: 100;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+      }
+      .stage-view {
+        padding: 10px;
+        padding-top: 60px;
+        text-align: center;
+      }
+      .stage-view h2 {
+        display: inline-block;
+        width: 80px;
+        font-size: 3em;
+        background: #456;
+        color: #fff;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 5px;
+        border: 5px solid rgba(0,0,0,0.1);
+        cursor: pointer;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+      }
+      .one {
+        background: #78B976;
+        color: #fff;
+      }
+      .two {
+        background: skyblue;
+        color: #456;
+      }
+      .three {
+        background: #FF7B7B;
+        color: #fff;
+      }
+      .four {
+        background: #21CCFF;
+        color: #fff;
+      }
+    </style>
+  </head>
+
+  <!-- Don't keep body as the view-port on android devices cause the views don't scroll -->
+  <body>
+    <!-- All our views will be shown here -->
+    <div class="stage-viewport" id="viewPort">
+      <div class="stage-view one" data-view="one">
+        <h2 id="btn1">&#187;</h2>
+      </div>
+      <div class="stage-view two" data-view="two">
+        <h2 id="btn2">&#171;</h2>
+        <h2 id="btn3">&#187;</h2>
+      </div>
+      <div class="stage-view three" data-view="three">
+        <h2 id="btn4">&#171;</h2>
+        <h2 id="btn5">&#187;</h2>
+      </div>
+      <div class="stage-view four" data-view="four">
+        <h2 id="btn6">&#171;</h2>
+      </div>
+    </div>
+    <div id="actionbar"></div>
+
+    
+    
+
+    
+    <script src="stage.js"> </script>
+    <script>
+      var ACTION = ("ontouchstart" in document.documentElement) ? "touchstart" : "click";
+      
+      Stage.defineView("one", function(stg, viewUi) {
+        return {
+          initialize: function() {
+            document.getElementById("btn1").addEventListener(ACTION, function() {
+              stg.pushView('two', {transition: 'slide'});
+            }, false);
+          }
+        };
+      });
+      Stage.defineView("two", function(stg, viewUi) {
+        return {
+          initialize: function() {
+            document.getElementById("btn2").addEventListener(ACTION, function() {
+              stg.popView();
+            }, false);
+            document.getElementById("btn3").addEventListener(ACTION, function() {
+              stg.pushView('three', {transition: 'lollipop'});
+            }, false);
+          }
+        };
+      });
+      Stage.defineView("three", function(stg, viewUi) {
+        return {
+          initialize: function() {
+            document.getElementById("btn4").addEventListener(ACTION, function() {
+              stg.popView();
+            }, false);
+            document.getElementById("btn5").addEventListener(ACTION, function() {
+              stg.pushView('four', {transition: null});
+            }, false);
+          }
+        };
+      });
+      Stage.defineView("four", function(stg, viewUi) {
+        return {
+          initialize: function() {
+            document.getElementById("btn6").addEventListener(ACTION, function() {
+              stg.popView();
+            }, false);
+          },
+          activate: function(opts) {
+            console.log(opts);
+          }
+        };
+      });
+      
+      var viewPort = document.getElementById("viewPort"),
+          actionbar = document.getElementById("actionbar");
+      viewPort.addEventListener("viewtransitionin", function(e) {
+        actionbar.innerHTML = "VIEW " + e.viewId.toUpperCase();
+      });
+      
+      var stage = Stage({
+        // viewport: "#viewPort",
+        viewport: viewPort
+      });
+      
+      setTimeout(function() {
+        stage.pushView("one", {transition: "slide"});
+      }, 500);      
+    </script>
+  </body>
+</html>

@@ -1,0 +1,955 @@
+(function(window, undefined) {
+  /* ------------------------------------- Utility Functions ------------------------------------ */
+  var Util = (function() {
+    // Some utility functions
+    function create(from) {
+      function T() {}
+      T.prototype = from;
+      return new T();
+    }
+
+    var createObject = (Object.create || create),
+        noop = function() {},
+        AProto = Array.prototype,
+        OProto = Object.prototype,
+        slice = AProto.slice,
+        nSlice = slice,
+        objToString = OProto.toString;
+
+    return {
+      create: createObject,
+      extend: function(From, extraProps) {
+        // we provide for initialization after constructor call
+        var initialize = extraProps._initialize || noop;
+        // once initialized, we don't really need it in the actual object
+        delete extraProps._initialize;
+
+        function F() {
+          From.apply && From.apply(this, arguments);
+          // call subclass initialization
+          initialize.apply(this, arguments);
+        }
+
+        var Proto = F.prototype = createObject(From.prototype);
+        for(var k in extraProps) {
+          if(extraProps.hasOwnProperty(k)) {
+            Proto[k] = extraProps[k];
+          }
+        }
+        Proto.constructor = F;
+        return F;
+      },
+      shallowCopy: function(/*target, source0, souce1, souce2, ... */) {
+        var target = arguments[0], sources = Array.prototype.slice.call(arguments, 1), src;
+        for(var i = 0, len = sources.length; i < len; i++) {
+          src = sources[i];
+          for(var k in src) {
+            target[k] = src[k];
+          }
+        }
+        return target;
+      },
+      /**
+       * Gets the type of object specified. The type returned is the [[Class]] internal property
+       * of the specified object. For build in types the values are:
+       * -----------------------------------------------------------
+       * String  
+       * Number  
+       * Boolean 
+       * Date    
+       * Error   
+       * Array   
+       * Function
+       * RegExp  
+       * Object  
+       *
+       * @param {Object} that The object/function/any of which the type is to be determined
+       */
+      getTypeOf: function(that) {
+        // why 8? cause the result is always of pattern '[object <type>]'
+        return objToString.call(that).slice(8, -1);
+      },
+      isTypeOf: function(that, type) {
+        return objToString.call(that).slice(8, -1) === type;
+      },
+      hasOwnProperty: function(obj, prop) {
+        if(obj.hasOwnProperty) {
+          return obj.hasOwnProperty(prop);
+        }else {
+          var val = obj[prop];
+          return typeof val !== "undefined" && obj.constructor.prototype[prop] !== val;
+        }
+      },
+      isFunction: function(that) {
+        return objToString.call(that) === "[object Function]";
+      },
+      isArray: function(that) {
+        return objToString.call(that) === "[object Array]";
+      },
+      slice: function(arrayLike, start, end) {
+        var arr, i,
+            /* jshint validthis:true */
+            len = arrayLike.length,
+            s = start || 0, e = end || len;
+        /* jshint validthis:true */
+        if(objToString.call(arrayLike) === "[object Array]") {
+          /* jshint validthis:true */
+          arr = nSlice.call(arrayLike, s, e);
+        }else {
+          // so that we can have things like sliceList(1, -1);
+          if(e < 0) {
+            e = len - e;
+          }
+          arr = [];
+          for(i = s; i < e; i++) {
+            arr[arr.length] = arrayLike[i];
+          }
+        }
+        return arr;
+      },
+      trim: function(str) {
+        return str.replace(/^\s+|\s+$/g, "");
+      }
+    };
+  })();
+
+
+
+  /* --------------------------------------- DOM Functions -------------------------------------- */
+  var DOM = (function() {
+    var clsRegExps = {}, 
+        isIe = !!window.ActiveXObject,
+        htmlRe = /^\s*<(!--\s*.*)?(\w+)[^>]*>/,
+        div = document.createElement("div"),
+        table = document.createElement("table"),
+        tr = document.createElement("tr"),
+        containers = {
+          "*": div,
+          tbody: table,
+          tfoot: table,
+          tr: document.createElement("tbody"),
+          td: tr,
+          th: tr
+        },
+        supportsEvent = typeof(window.Event === "function");
+    
+    function asNodes(nodeName, html, isTable) {
+        var frags, c = div.cloneNode();
+        html += "";
+        c.innerHTML = ["<", nodeName, ">", html, "</", nodeName, ">"].join("");
+        frags = isTable ? c.firstChild.firstChild.childNodes : c.firstChild.childNodes;
+        return frags;
+    }
+    
+    function classRe(clazz) {
+      // new RegExp("\\b" + clazz + "[^\w-]")
+      return clsRegExps[clazz] || (clsRegExps[clazz] =
+          new RegExp("(^|\\s+)" + clazz + "(?:\\s+|$)")); // thank you xui.js :) 
+    }
+
+    function _addClass(elem, clName) {
+      var cList = elem.classList;
+      if(!cList || !clName) {
+        return false;
+      }
+      cList.add(clName);
+      return true;
+    }
+
+    function _removeClass(elem, clName) {
+      var cList = elem.classList;
+      if(!cList || !clName) {
+        return false;
+      }
+      cList.remove(clName);
+      return true;
+    }
+
+    function hasClass(element, clName) {
+      return classRe(clName).test(element.className);
+    }
+    
+    function createEvent(type, node, options) {
+      var event = document.createEvent('Event');
+      event.initEvent(type, options.bubbles, options.cancelable);
+      event.srcElement = node;
+      return event;
+    }
+
+    return {
+      selectOne: function(selector, context) {
+        if(typeof selector === "string") {
+          return (context || document).querySelector(selector);
+        }
+        return selector;
+      },
+      select: function(selector, context) {
+        if(typeof selector === "string") {
+          return (context || document).querySelectorAll(selector);
+        }
+        return selector;
+      },
+      asFragment: function(html, tgName) {
+        var c, ret, children, tag, fragment;
+        if(!tgName) {
+          ret = htmlRe.exec(html);
+          tgName = ret ? ret[2] : null;
+        }
+        c = (containers[tgName] || div).cloneNode();
+        if(isIe) {
+          tag = c.tagName.toLowerCase();
+          if(tag === "tbody" || tag === "table" || tag === "thead" || tag === "tfoot") {
+              children = asNodes("table", html, true);
+          }
+        }else {
+          c.innerHTML = "" + html;
+          children = c.childNodes;
+        }
+        
+        fragment = document.createDcoumentFragment();
+        for(var i = 0, len = children.length; i < len; i += 1) {
+          fragment.appendChild(children[i]);
+        }
+        return fragment;
+      },
+      dispatchEvent: function(type, options) {
+        var event, node = options.element || document, data = options.data;
+        if(supportsEvent) {
+          try {
+            event = new Event(type, {
+              bubbles: options.bubbles || false,
+              cancelable: options.cancelable || false
+            });
+          }catch(e) {
+            event = createEvent(type, node, options);
+          }
+        }else {
+          event = createEvent(type, node, options);
+        }
+        // event.data = options.data;
+        for(var k in data) {
+          if(Util.hasOwnProperty(data, k)) {
+            event[k] = data[k];
+          }
+        }
+        node.dispatchEvent(event);
+      },
+      hasClass: hasClass,
+      addClass: function(elements, clName) {
+        var el;
+        if(elements.length) {
+          for(var i = 0, len = elements.length; i < len; i += 1) {
+            el = elements[i];
+            if(!hasClass(el, clName) && !_addClass(el, clName)) {
+               el.className += " " + clName;
+            }
+          }
+        }else {
+          el = elements;
+          if(!hasClass(el, clName) && !_addClass(el, clName)) {
+             el.className += " " + clName;
+          }
+        }
+        return this;
+      },
+      removeClass: function(elements, clName) {
+        var el;
+        if(elements.length) {
+          for(var i = 0, len = elements.length; i < len; i += 1) {
+            el = elements[i];
+            if(hasClass(el, clName) && !_removeClass(el, clName)) {
+               el.className = Util.trim(el.className.replace(classRe(clName), "$1"));
+            }
+          }
+        }else {
+          el = elements;
+          if(hasClass(el, clName) && !_removeClass(el, clName)) {
+             el.className = Util.trim(el.className.replace(classRe(clName), "$1"));
+          }
+        }
+        return this;
+      },
+      replaceClass: function(elements, clName, withClName) {
+        var el, len = elements.length;
+        if(len) {
+          for(var i = 0; i < len; i += 1) {
+            el= elements[i];
+            el.className = Util.trim(el.className.replace(classRe(clName), " " + withClName));
+          }
+        }else {
+          el = elements;
+          el.className = Util.trim(el.className.replace(classRe(clName), " " + withClName));
+        }
+      },
+      data: function(element) {
+        var name = arguments[1], 
+            value = arguments[2], 
+            data = element.__stagedata__;
+        if(!data) {
+          data = element.__stagedata__ = {};
+        }
+        
+        if(arguments.length === 2) {
+          return data[name];
+        }else if(arguments.length === 3) {
+          data[name] = value;
+        }
+        return this;
+      }
+    };
+  })();
+  
+
+
+  /* ----------------------------------- Stage Implementation ----------------------------------- */
+  var Stage = (function() {
+    var VIEW_DEFS = {},
+        CONTROLLER_METHODS = ["initialize", "activate", "update", "deactivate", "destroy"],
+        noop = function() {},
+        raf = (window.requestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.msRequestAnimationFrame ||
+            function(cb) {
+              return window.setTimeout(cb, 1000 / 60);
+            }),
+        Env = (function() {
+          var prefixes = ["", "Webkit", "Moz", "O", "ms", "MS"],
+              transitionend = ["transitionend", "webkitTransitionEnd", "transitionend",
+                "oTransitionEnd", "MSTransitionEnd"],
+              animationend = ["animationend", "webkitAnimationEnd", "animationend",
+                "oAnimationEnd", "animationend"],
+              div = document.createElement("div"),
+              style = div.style;
+          return {
+            transition: (function() {
+              var prefix, prop;
+              for(var i = 0, len = prefixes.length; i < len; i += 1) {
+                prefix = prefixes[i], prop = prefix ? prefix + "Transition" : "transition";
+                if(typeof style[prop] !== "undefined") {
+                  return {
+                    property: prop,
+                    end: transitionend[i]
+                  };
+                }
+              }
+              return {};
+            })(),
+            animation:(function() {
+              var prefix, prop;
+              for(var i = 0, len = prefixes.length; i < len; i += 1) {
+                prefix = prefixes[i], prop = prefix ? prefix + "Animation" : "animation";
+                if(typeof style[prop] !== "undefined") {
+                  return {
+                    property: prop,
+                    end: animationend[i]
+                  };
+                }
+              }
+              return {};
+            })(),
+            hashchange: ("onhashchange" in window) ? "onhashchange" : null
+          };
+        })(),
+        STAGE_DEFAULT_OPTIONS = {
+          transitionDelay: 150,
+          transition: "slide"
+        },
+        NO_TRANSITION = "no-transition";
+        
+    console.log(Env);
+        
+    /**
+     * Makes an XmlHttpRequest request
+     * @param {Object} options The options can be
+     * {
+     *   path: "the path of the resource",
+     *   method: http method (defaults to "GET")
+     *   success: The success handler
+     *   fail: Failure handler
+     *   timeout: The timeout for the request
+     * }
+     * @returns {undefined}
+     */    
+    function ajax(options) {
+      var xhr = new XMLHttpRequest(), 
+          wasConnected = false,
+          path = options.path,
+          method = options.method || "GET",
+          success = options.success,
+          fail = options.fail,
+          timeout = typeof options.timeout === "undefined" ? 30000 : options.timeout;
+          
+      xhr.timeout = timeout;
+      xhr.open(method, path, true);
+      // Some headers
+      // Add listeners
+      xhr.addEventListener("readystatechange", function() {
+        var state = xhr.readyState, code;
+         
+         // This is for safari/chrome where ready state is 4 but status is 0 in case of local
+         // files i.e. file://
+         if(state === 2 || state === 3) {
+           wasConnected = true;
+         }
+         if(state === 4) {
+           code = xhr.status;
+           if((code >= 200 && code < 400) || (code === 0 && wasConnected)) {
+             (success && success(xhr));
+           }else {
+             (fail && fail(code, xhr));
+           }
+         }
+      });
+      xhr.addEventListener("timeout", function() {
+        (fail && fail("timeout", xhr));
+      });
+      // Send!
+      xhr.send();
+    }
+    
+    /**
+     * Appends an inline script element to the specified element
+     * @param {String} scriptContent The content of the script
+     * @param {Element} toElement The HTML element
+     * @returns {undefined}
+     */
+    function addInlineScript(scriptContent, toElement) {
+      var script = document.createElement("script");
+      script.textContent = scriptContent;
+      toElement.appendChild(script);
+    }
+    
+    /**
+     * Adds a script element with a 'src' attribute and appends the script element to specified 
+     * element
+     * @param {String} src The source of the script
+     * @param {Element} toElement The element to append to
+     * @param {function} callback The function to call after the script has loaded
+     * @returns {undefined}
+     */
+    function addRemoteScript(src, toElement, callback) {
+      var script = document.createElement("script");
+      if("onreadystatechange" in script) {
+        script.onreadystatechange = function() {
+          if(this.readyState === "loaded" || this.readyState === "complete") {
+            callback(src);
+          }
+        };
+      }else {
+        script.onload = function() {
+          callback(src);
+        };
+      }
+      script.async = 1;
+      toElement.appendChild(script);
+    }
+    
+    /**
+     * Loads the view template along with the scripts the view has defined into the viewPort
+     * @param {String} path The view template path
+     * @param {Element} viewPort The viewport element
+     * @param {function} callback The function to call after the view has been loaded
+     * @returns {undefined}
+     */
+    function loadView(path, viewPort, callback) {
+      ajax(path, {
+        path: path,
+        method: "GET",
+        success: function(xhr) {
+          var div = document.createElement("div"),
+              viewFragment = DOM.asFragment(xhr.responseText),
+              scriptElements = Util.slice(DOM.select("script", viewFragment)),
+              processScripts = function() {
+                var scriptElem, scriptSrc, scriptType;
+                if(scriptElements.length) {
+                  scriptElem = scriptElements.unshift;
+                  scriptType = scriptElem.getAttribute("type") || "text/javascript";
+                  if(scriptType.indexOf("/javascript") !== -1) {
+                    scriptElem.parentNode.removeChild(scriptElem);
+                    if((scriptSrc = scriptElem.getAttribute("src"))) {
+                      addRemoteScript(scriptSrc, div, processScripts);
+                    }else {
+                      addInlineScript(scriptElem.textContent, div);
+                    }
+                  }
+                }else {
+                  callback({
+                    path: path,
+                    error: false,
+                    element: div
+                  });
+                }
+              };
+              
+          // set some div attrs
+          div.className = "view-holder";
+          div.setAttribute("data-view-template", path);
+          
+          // put it in the viewport so that the scripts load correctly
+          viewPort.appendChild(div);
+
+          // start processing scripts
+          processScripts();
+        },
+        fail: function(error, xhr) {
+          callback({
+            path: path,
+            error: error,
+            xhr: xhr
+          });
+        }
+      });
+    }
+    
+    /*
+     * 
+     * View definition
+     * {
+     *    id: "view-id",
+     *    templatePath: "/path/to/template",
+     *    factory: factory function that creates view controller
+     * }
+     *  
+     */
+    function getOrCreateViewDef(viewId) {
+      var def = VIEW_DEFS[viewId];
+      if(!def) {
+        def = VIEW_DEFS[viewId] = {
+          id: viewId
+        };
+      }
+      return def;
+    }
+    
+    function View(id, elem, controller) {
+      this.id = id;
+      this.element = elem;
+      this.controller = controller;
+      DOM.data(this.element, "viewId", id);
+    }
+    View.prototype = {
+      constructor: View,
+      show: function(bShowing) {
+        (bShowing ? DOM.addClass(this.element, "showing") : DOM.removeClass(this.element, "showing"));
+        return this;
+      },
+      bringToTop: function() {
+        DOM.addClass(this.element, "in");
+      },
+      isOnTop: function() {
+        return DOM.hasClass(this.element, "in");
+      },
+      stack: function() {
+        if(!DOM.hasClass(this.element, "stack")) {
+          DOM.removeClass(this.element, "in")
+              .addClass(this.element, "stack");
+        }
+        return this;
+      },
+      isStacked: function() {
+         return DOM.hasClass(this.element, "stack");
+      },
+      unStack: function(unstackClass) {
+        DOM.removeClass(this.element, "stack");
+        if(unstackClass) {
+            DOM.addClass(this.element, "unstack");
+        }
+        return this;
+      },
+      wasUnStacked: function() {
+        return DOM.hasClass(this.element, "unstack");
+      },
+      pop: function() {
+        DOM.removeClass(this.element, "in").addClass(this.element, "pop");
+        // DOM.replaceClass(this.element, "in", "pop");
+        return this;
+      },
+      wasPopped: function() {
+        return DOM.hasClass(this.element, "pop");
+      },
+      reset: function(states) {
+        if(typeof states === "string") {
+          DOM.removeClass(this.element, states);
+        }else {
+          var self = this;
+          states.forEach(function(s) {
+            DOM.removeClass(self.element, s);
+          });
+        }
+      }
+    };
+    
+    /**
+     * Creates a Stage instance 
+     * @param {Object} opts The options object as below:
+     * {
+     *   viewport: The viewPort element selector
+     *   transitionDelay: The delay between transitions (default 50)
+     *   transition: The transition name (default "slide")
+     * }
+     * @returns {Object} A stage instance
+     */
+    function Stage(opts) {
+      var options = Util.shallowCopy({}, STAGE_DEFAULT_OPTIONS, opts),
+          viewPort = DOM.selectOne(options.viewport),
+          views = {},
+          transitionState = {
+            name: "",
+            fromView: null,
+            toView: null,
+            isInProgress: function() {
+              return this.fromView || this.toView;
+            },
+            clear: function() {
+              this.fromView = this.toView = null;
+            }
+          },
+          viewStack = [],
+          instance;
+  
+      console.debug("Stage options ", options);
+          
+      if(!viewPort || viewPort.nodeType !== 1) {
+        throw new Error("Use a valid element as view port");
+      }
+      
+      if(options.transition) {
+        DOM.addClass(viewPort, options.transition);
+        transitionState.name = options.transition; 
+      }
+ 
+      /**
+       * Prepares the view from view definition (as defined by Stage.defineView()). This method
+       * calls the factory and creates the view controller specific to this Stage instance
+       * @param {String} viewId The vid id specified by data-view attribute
+       * @returns {Object} The view info object
+       */
+      function prepareView(viewId) {
+        var selector = '[data-view="' + viewId + '"]',
+            viewUi = DOM.selectOne(selector, viewPort),
+            viewDef = VIEW_DEFS[viewId],
+            viewController,
+            view;
+
+        if(!viewUi) {
+          throw new Error("UI for view " + viewId + " not found.");
+        }
+
+        viewUi.addEventListener(Env.transition.end || "transitionend", handleViewTransitionEnd);
+        viewUi.addEventListener(Env.animation.end || "animationend", handleViewTransitionEnd);
+        
+        // console.debug("Creating view factory for ", viewId);
+        viewController = viewDef.factory(instance, viewUi);
+        CONTROLLER_METHODS.forEach(function(m) {
+          if(typeof viewController[m] === "undefined") {
+            viewController[m] = noop;
+          }
+        });
+        
+        view = views[viewId] = new View(viewId, viewUi, viewController);
+        return view;
+      }
+      
+      /**
+       * Pushes a view onto the view stack and transitions the old and new views
+       * @param {String} viewId The id of the defined view to push
+       * @param {Object} viewOptions Optional options and data for the view
+       * @returns {undefined}
+       */
+      function pushViewInternal(viewId, viewOptions) {
+        var view = views[viewId],
+            currentView,
+            transition = "transition" in viewOptions ? viewOptions.transition : options.transition,
+            transitionUI = function() {
+              raf(function() {
+                if(currentView) {
+                  stackViewUI(currentView, transition);
+                }
+                pushViewUI(view, transition);
+              });
+            };
+            
+        // Check if this is an update to current view
+        currentView = viewStack.length ? viewStack[viewStack.length - 1] : null;
+        if(currentView) {
+          if(currentView.id === viewId) {
+            // Its just a view update with different options
+            currentView.controller.update(viewOptions);
+            return;
+          }
+          transitionState.fromView = viewOptions.fromView = currentView.id;
+        }
+        
+        // Transitions are set on the view port
+        // console.debug("pushView(): Using transition ", transition);
+        var currTransition = transitionState.name;
+        if(currTransition !== transition) {
+          if(currTransition) {DOM.removeClass(viewPort, currTransition);}
+          DOM.addClass(viewPort, transition);
+          // console.debug("pushView(): Replacing transition", currTransition, " -> ", transition);
+          transitionState.name = transition;           
+        }
+        
+        // We are actually transitioning
+        DOM.addClass(viewPort, "view-transitioning");
+        
+        // Initialize the view if its a new view 
+        if(!view) {
+          view = prepareView(viewId, viewOptions);
+          // Make the dom visible for controller to initialize.
+          view.show(true);
+          // Initialize the view
+          view.controller.initialize(viewOptions);
+        }else {
+          // If this view was earlier stacked, remove the 'stack' class
+          view.unStack().show(true);
+        }
+        
+        // set the current transition (should we use a stack?)
+        view.transition = transition;
+        
+        if(currentView) {
+          currentView.controller.deactivate();
+        }
+        var viewActivate = view.controller.activate;
+        if(viewActivate.length === 2) { // expects acync activation
+          view.controller.activate(viewOptions, function() {
+            setTimeout(transitionUI, options.transitionDelay);
+          });
+        }else {
+          // @TODO Add Promise API support?
+          view.controller.activate(viewOptions);
+          setTimeout(transitionUI, options.transitionDelay);
+        }
+        viewStack.push(view);
+      }
+      
+      function popViewInternal(viewOptions, toView) {
+        var currentView, 
+            view, 
+            idx,
+            transition = transitionState.name,
+            transitionUI = function() {
+              raf(function() {
+                popViewUI(currentView, transition);
+                unstackViewUI(view, transition);
+              });
+            };
+        
+        currentView = viewStack.pop();
+        if(toView) {
+          idx = indexOfView(toView);
+          if(idx === -1) {
+            throw new Error("View " + toView + " is not on stack");
+          }
+          view = viewStack[idx];
+          // Remove upto 'view' views from the stack
+          viewStack.splice(idx + 1, viewStack.length - (idx + 1));
+        }else {
+          view = viewStack[viewStack.length - 1];
+        }
+        
+        transitionState.toView = view.id;
+        
+        // Check if this view has a 'stack' class
+        view.stack();
+        // We are actually transitioning
+        DOM.addClass(viewPort, "view-transitioning");
+        view.show(true);
+        
+        currentView.controller.deactivate();
+        var viewActivate = view.controller.activate;
+        if(viewActivate.length === 2) { // expects acync activation
+          view.controller.activate(viewOptions, function() {
+            setTimeout(transitionUI, options.transitionDelay);
+          });
+        }else {
+          // @TODO Add Promise API support?
+          view.controller.activate(viewOptions);
+          setTimeout(transitionUI, options.transitionDelay);
+        }
+      }
+      
+      function indexOfView(viewId) {
+        var i, len;
+        for(i = 0, len = viewStack.lenth; (i < len && viewStack[i].id !== viewId); i += 1);
+        return i === len ? -1 : i;
+      }
+      
+      function pushViewUI(view, transition) {
+        view.bringToTop();
+        if(!Env.transition.end || !transition) {
+          handleViewTransitionEnd({
+            target: view.element,
+            propertyName: NO_TRANSITION
+          });
+        }
+      }
+      
+      function stackViewUI(view, transition) {
+        view.stack();
+        if(!Env.transition.end || !transition) {
+          handleViewTransitionEnd({
+            target: view.element,
+            propertyName: NO_TRANSITION
+          });
+        }
+      }
+      
+      function popViewUI(view, transition) {
+        view.pop();
+        if(!Env.transition.end || !transition) {
+          handleViewTransitionEnd({
+            target: view.element,
+            propertyName: NO_TRANSITION
+          });
+        }
+      }
+      
+      function unstackViewUI(view, transition) {
+        view.unStack("unstack").bringToTop();
+        if(!Env.transition.end || !transition) {
+          handleViewTransitionEnd({
+            target: view.element,
+            propertyName: NO_TRANSITION
+          });
+        }
+      }
+      
+      function dispatchViewTransitionEvents(type, viewElement, viewId) {
+        DOM.dispatchEvent("viewtransition" + type, {
+          element: viewPort,
+          data: {
+            viewId: viewId
+          }
+        });
+        DOM.dispatchEvent("transition" + type, {
+          element: viewElement
+        });
+      }
+      
+      function handleViewTransitionEnd(e) {
+        var viewElement = e.target, 
+            viewId = DOM.data(viewElement, "viewId"),
+            view = views[viewId],
+            // property = e.propertyName, 
+            tType,
+            currTransition;
+            
+        if(view.isStacked()) {
+          transitionState.fromView = null;
+          view.show(false);
+          tType = "out";
+        }else if(view.isOnTop()) {
+          DOM.removeClass(viewPort, "view-transitioning");
+          transitionState.toView = null;
+          if(view.wasUnStacked()) {
+            // use the transition of view that was unstacked so that it pops or stacks appropriately
+            view.reset("unstack");
+            currTransition = transitionState.name;
+            if(currTransition !== view.transition) {
+              DOM.removeClass(viewPort, currTransition).addClass(viewPort, view.transition);
+              // console.debug("handleViewTransitionEnd() Replacing transition", currTransition, 
+              //    " -> ", view.transition);
+              transitionState.name = view.transition;
+            }
+          }
+          tType = "in";
+        }else if(view.wasPopped()) {
+          transitionState.fromView = null;
+          view.reset(["showing", "pop"]);
+          tType = "out";
+        }
+        dispatchViewTransitionEvents(tType, viewElement, viewId);
+      }
+          
+      instance = {
+        pushView: function(viewId, opts) {
+          var view = views[viewId], 
+              viewDef,
+              viewOptions = Util.shallowCopy({}, opts);
+              
+          // If we are already transitioning, ignore this call
+          if(transitionState.isInProgress()) {
+            console.debug("pushView() View transitioin in progress. Ignoring this call");
+            return;
+          }
+          
+          // Indicate we are progressing
+          transitionState.toView = viewId; 
+          
+          if(!view) {
+            viewDef = VIEW_DEFS[viewId];
+            if(!viewDef) {
+              // clear transition states when there are errors
+              transitionState.clear();
+              throw new Error("Don't know of view: " + viewId);
+            }
+            if(!viewDef.factory) {
+              loadView(viewDef.path, viewPort, function(viewData) {
+                if(viewData.error) {
+                  // clear transition states when there are errors
+                  transitionState.clear();
+                  throw new Error("Error loading view: " + viewData.error);
+                }
+                pushViewInternal(viewId, viewOptions);
+              });
+            }else {
+              pushViewInternal(viewId, viewOptions);
+            }
+          }else {
+            pushViewInternal(viewId, viewOptions);
+          }
+        },
+        popView: function(opts) {
+          var viewOptions = Util.shallowCopy({}, opts), toViewId = viewOptions.toView;
+          
+          // If we are already transitioning, ignore this call
+          if(transitionState.isInProgress()) {
+            console.debug("popView() View transitioin in progress. Ignoring this call");
+            return;
+          }
+          if(viewStack.length <= 1) {
+            throw new Error("Can't pop last view");
+          }
+          
+          // Indicate that we are transitionin from current view
+          transitionState.fromView = this.currentView();
+          
+          popViewInternal(viewOptions, toViewId);
+        },
+        currentView: function() {
+          var currentView = viewStack[viewStack.length - 1];
+          return currentView ? currentView.id : null;
+        }
+      };
+      
+      return instance;
+    }
+    
+
+    /* ------------------------------------ Some static functions ------------------------------- */
+
+    Stage.defineView = function(viewId, factory) {
+      var def = getOrCreateViewDef(viewId, factory);
+      def.factory = factory;
+    };
+
+    Stage.views = function(views) {
+      var def;
+      for(var viewId in views) {
+        if(!views.hasOwnProperty(viewId)) {
+          continue;
+        }
+        def = getOrCreateViewDef(viewId);
+        def.templatePath = views[viewId];
+      }
+    };
+
+    return Stage;
+  })();
+
+  
+  window.Stage = Stage;
+})(window);
