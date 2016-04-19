@@ -269,6 +269,7 @@
         }
         return this;
       },
+      /*
       replaceClass: function(elements, clName, withClName) {
         var el, len = elements.length;
         if(len) {
@@ -281,6 +282,7 @@
           el.className = Util.trim(el.className.replace(classRe(clName), " " + withClName));
         }
       },
+      */
       data: function(element) {
         var name = arguments[1], 
             value = arguments[2], 
