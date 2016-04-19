@@ -1,4 +1,25 @@
-(function(window, undefined) {
+(function(global, factory) {
+  var stg = factory(global);
+  if(typeof define === "function" && define.amd) {
+    // AMD support
+    define(function() {return stg;});
+  }else if(typeof module === "object" && module.exports) {
+    // CommonJS support
+    module.exports = stg;
+  }else {
+    // We are probably running in the browser    
+    global.Stage = stg;
+  }
+  
+})(this, function(global, undefined) {
+  // All global variables that are used in stagejs
+  var document = global.document,
+      setTimeout = global.setTimeout,
+      setInterval = global.setInterval,
+      XMLHttpRequest = global.XMLHttpRequest,
+      requestAnimationFrame = global.requestAnimationFrame;
+      
+  
   /* ------------------------------------- Utility Functions ------------------------------------ */
   var Util = (function() {
     // Some utility functions
@@ -269,20 +290,6 @@
         }
         return this;
       },
-      /*
-      replaceClass: function(elements, clName, withClName) {
-        var el, len = elements.length;
-        if(len) {
-          for(var i = 0; i < len; i += 1) {
-            el= elements[i];
-            el.className = Util.trim(el.className.replace(classRe(clName), " " + withClName));
-          }
-        }else {
-          el = elements;
-          el.className = Util.trim(el.className.replace(classRe(clName), " " + withClName));
-        }
-      },
-      */
       data: function(element) {
         var name = arguments[1], 
             value = arguments[2], 
@@ -308,12 +315,12 @@
     var VIEW_DEFS = {},
         CONTROLLER_METHODS = ["initialize", "activate", "update", "deactivate", "destroy"],
         noop = function() {},
-        raf = (window.requestAnimationFrame ||
-            window.mozRequestAnimationFrame ||
-            window.webkitRequestAnimationFrame ||
-            window.msRequestAnimationFrame ||
+        raf = (requestAnimationFrame ||
+            global.mozRequestAnimationFrame ||
+            global.webkitRequestAnimationFrame ||
+            global.msRequestAnimationFrame ||
             function(cb) {
-              return window.setTimeout(cb, 1000 / 60);
+              return setTimeout(cb, 1000 / 60);
             }),
         Env = (function() {
           var prefixes = ["", "Webkit", "Moz", "O", "ms", "MS"],
@@ -349,8 +356,8 @@
                 }
               }
               return {};
-            })(),
-            hashchange: ("onhashchange" in window) ? "onhashchange" : null
+            })()
+            // , hashchange: ("onhashchange" in global) ? "onhashchange" : null
           };
         })(),
         STAGE_DEFAULT_OPTIONS = {
@@ -951,7 +958,8 @@
 
     return Stage;
   })();
-
   
-  window.Stage = Stage;
-})(window);
+  
+
+  return Stage;
+});
