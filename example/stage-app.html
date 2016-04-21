@@ -44,7 +44,7 @@
         padding: 15px;
         font-weight: bold;
         font-size: 1.1em;
-        border-bottom: 3px solid rgba(0,0,0,0.3);
+        border-top: 1px solid rgba(0,0,0,0.3);
         z-index: 100;
         -moz-user-select: none;
         -webkit-user-select: none;
@@ -96,18 +96,18 @@
     <!-- All our views will be shown here -->
     <div class="stage-viewport" id="viewPort">
       <div class="stage-view one" data-view="one">
+        <h1>View One</h1>
         <h2 id="btn1">&#187;</h2>
       </div>
       <div class="stage-view two" data-view="two">
+        <h1>View Two</h1>
         <h2 id="btn2">&#171;</h2>
         <h2 id="btn3">&#187;</h2>
       </div>
       <div class="stage-view three" data-view="three">
+        <h1>View Three</h1>
         <h2 id="btn4">&#171;</h2>
         <h2 id="btn5">&#187;</h2>
-      </div>
-      <div class="stage-view four" data-view="four">
-        <h2 id="btn6">&#171;</h2>
       </div>
     </div>
     <div id="actionbar"></div>
@@ -136,7 +136,7 @@
               stg.popView();
             }, false);
             document.getElementById("btn3").addEventListener(ACTION, function() {
-              stg.pushView('three', {transition: 'lollipop'});
+              stg.pushView('three', {transition: 'fade'});
             }, false);
           }
         };
@@ -153,18 +153,6 @@
           }
         };
       });
-      Stage.defineView("four", function(stg, viewUi) {
-        return {
-          initialize: function() {
-            document.getElementById("btn6").addEventListener(ACTION, function() {
-              stg.popView();
-            }, false);
-          },
-          activate: function(opts) {
-            console.log(opts);
-          }
-        };
-      });
       
       var viewPort = document.getElementById("viewPort"),
           actionbar = document.getElementById("actionbar");
@@ -175,6 +163,11 @@
       var stage = Stage({
         // viewport: "#viewPort",
         viewport: viewPort
+      });
+      
+      // Define a fourth external view
+      Stage.views({
+        "four": "view-four.html"
       });
       
       setTimeout(function() {

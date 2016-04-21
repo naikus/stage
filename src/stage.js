@@ -1,3 +1,4 @@
+/* global define, module */
 (function(global, factory) {
   var stg = factory(global);
   if(typeof define === "function" && define.amd) {
@@ -23,14 +24,18 @@
   /* ------------------------------------- Utility Functions ------------------------------------ */
   var Util = (function() {
     // Some utility functions
+    /* @Deadcode
     function create(from) {
       function T() {}
       T.prototype = from;
       return new T();
     }
+    */
 
-    var createObject = (Object.create || create),
-        noop = function() {},
+    var noop = function() {},
+        /* @Deadcode
+        createObject = (Object.create || create), 
+        */
         AProto = Array.prototype,
         OProto = Object.prototype,
         slice = AProto.slice,
@@ -38,6 +43,7 @@
         objToString = OProto.toString;
 
     return {
+      /* @Deadcode
       create: createObject,
       extend: function(From, extraProps) {
         // we provide for initialization after constructor call
@@ -60,6 +66,7 @@
         Proto.constructor = F;
         return F;
       },
+      */
       shallowCopy: function(/*target, source0, souce1, souce2, ... */) {
         var target = arguments[0], sources = Array.prototype.slice.call(arguments, 1), src;
         for(var i = 0, len = sources.length; i < len; i++) {
@@ -86,6 +93,7 @@
        *
        * @param {Object} that The object/function/any of which the type is to be determined
        */
+      /* @Deadcode
       getTypeOf: function(that) {
         // why 8? cause the result is always of pattern '[object <type>]'
         return objToString.call(that).slice(8, -1);
@@ -93,6 +101,7 @@
       isTypeOf: function(that, type) {
         return objToString.call(that).slice(8, -1) === type;
       },
+      */
       hasOwnProperty: function(obj, prop) {
         if(obj.hasOwnProperty) {
           return obj.hasOwnProperty(prop);
@@ -101,12 +110,14 @@
           return typeof val !== "undefined" && obj.constructor.prototype[prop] !== val;
         }
       },
+      /* @Deadcode
       isFunction: function(that) {
         return objToString.call(that) === "[object Function]";
       },
       isArray: function(that) {
         return objToString.call(that) === "[object Array]";
       },
+      */
       slice: function(arrayLike, start, end) {
         var arr, i,
             /* jshint validthis:true */
@@ -227,7 +238,7 @@
           children = c.childNodes;
         }
         
-        fragment = document.createDcoumentFragment();
+        fragment = document.createDocumentFragment();
         for(var i = 0, len = children.length; i < len; i += 1) {
           fragment.appendChild(children[i]);
         }
@@ -450,6 +461,7 @@
           callback(src);
         };
       }
+      script.src = src;
       script.async = 1;
       toElement.appendChild(script);
     }
@@ -462,25 +474,25 @@
      * @returns {undefined}
      */
     function loadView(path, viewPort, callback) {
-      ajax(path, {
+      ajax({
         path: path,
         method: "GET",
         success: function(xhr) {
           var div = document.createElement("div"),
               viewFragment = DOM.asFragment(xhr.responseText),
-              scriptElements = Util.slice(DOM.select("script", viewFragment)),
+              scriptElements = Util.slice(DOM.select("script", viewFragment)).filter(function(se) {
+                var type = se.getAttribute("type") || "text/javascript";
+                return type.indexOf("/javascript") !== -1;
+              }),
               processScripts = function() {
-                var scriptElem, scriptSrc, scriptType;
+                var script, src;
                 if(scriptElements.length) {
-                  scriptElem = scriptElements.unshift;
-                  scriptType = scriptElem.getAttribute("type") || "text/javascript";
-                  if(scriptType.indexOf("/javascript") !== -1) {
-                    scriptElem.parentNode.removeChild(scriptElem);
-                    if((scriptSrc = scriptElem.getAttribute("src"))) {
-                      addRemoteScript(scriptSrc, div, processScripts);
-                    }else {
-                      addInlineScript(scriptElem.textContent, div);
-                    }
+                  script = scriptElements.shift();
+                  if((src = script.getAttribute("src"))) {
+                    addRemoteScript(src, div, processScripts);
+                  }else {
+                    addInlineScript(script.textContent, div);
+                    processScripts();
                   }
                 }else {
                   callback({
@@ -491,9 +503,14 @@
                 }
               };
               
+          scriptElements.forEach(function(script) {
+            script.parentNode.removeChild(script);
+          });
+              
           // set some div attrs
           div.className = "view-holder";
           div.setAttribute("data-view-template", path);
+          div.appendChild(viewFragment);
           
           // put it in the viewport so that the scripts load correctly
           viewPort.appendChild(div);
@@ -896,7 +913,7 @@
               throw new Error("Don't know of view: " + viewId);
             }
             if(!viewDef.factory) {
-              loadView(viewDef.path, viewPort, function(viewData) {
+              loadView(viewDef.templatePath, viewPort, function(viewData) {
                 if(viewData.error) {
                   // clear transition states when there are errors
                   transitionState.clear();

@@ -1,0 +1,21 @@
+<div class="stage-view four" data-view="four">
+  <h1>View Four</h1>
+  <h2 id="btn6">&#171;</h2>
+  <script src="four.js"></script>
+  <script>
+    // var Stage = require("stage");
+    Stage.defineView("four", function(stg, viewUi) {
+      dummy(); // from four.js
+      return {
+        initialize: function() {
+          document.getElementById("btn6").addEventListener(ACTION, function() {
+            stg.popView();
+          }, false);
+        },
+        activate: function(opts) {
+          console.log(opts);
+        }
+      };
+    });
+  </script>
+</div>
