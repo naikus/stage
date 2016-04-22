@@ -1,4 +1,4 @@
-/* global define, module */
+/* global window, define, module */
 (function(global, factory) {
   var stg = factory(global);
   if(typeof define === "function" && define.amd) {
@@ -12,7 +12,7 @@
     global.Stage = stg;
   }
   
-})(this, function(global, undefined) {
+})(typeof window === "undefined" ? this : window, function(global, undefined) {
   // All global variables that are used in stagejs
   var document = global.document,
       setTimeout = global.setTimeout,
