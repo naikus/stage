@@ -232,6 +232,9 @@
           tag = c.tagName.toLowerCase();
           if(tag === "tbody" || tag === "table" || tag === "thead" || tag === "tfoot") {
               children = asNodes("table", html, true);
+          }else {
+            c.innerHTML = "" + html;
+            children = c.childNodes;  
           }
         }else {
           c.innerHTML = "" + html;
@@ -400,8 +403,8 @@
           fail = options.fail,
           timeout = typeof options.timeout === "undefined" ? 30000 : options.timeout;
           
-      xhr.timeout = timeout;
       xhr.open(method, path, true);
+      xhr.timeout = timeout;
       // Some headers
       // Add listeners
       xhr.addEventListener("readystatechange", function() {
