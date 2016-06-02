@@ -37,18 +37,19 @@
         position: fixed;
         width: 100%;
         box-sizing: border-box;
-        bottom: 0;
+        top: 0;
         left: 0;
         background-color: #456;
         color: #fff;
-        padding: 15px;
-        font-weight: bold;
-        font-size: 1.1em;
+        padding: 10px;
+        font-weight: normal;
+        font-size: 0.9em;
         border-top: 1px solid rgba(0,0,0,0.3);
         z-index: 100;
         -moz-user-select: none;
         -webkit-user-select: none;
         -ms-user-select: none;
+        display: none;
       }
       .stage-view {
         padding: 10px;
@@ -136,7 +137,7 @@
               stg.popView();
             }, false);
             document.getElementById("btn3").addEventListener(ACTION, function() {
-              stg.pushView('three', {transition: 'fade'});
+              stg.pushView('three', {transition: 'fancy'});
             }, false);
           }
         };
@@ -148,7 +149,7 @@
               stg.popView();
             }, false);
             document.getElementById("btn5").addEventListener(ACTION, function() {
-              stg.pushView('four', {transition: null});
+              stg.pushView('four', {transition: "lollipop"});
             }, false);
           }
         };
