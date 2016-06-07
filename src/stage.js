@@ -717,7 +717,7 @@
           if(currTransition) {DOM.removeClass(viewPort, currTransition);}
           DOM.addClass(viewPort, transition);
           // console.debug("pushView(): Replacing transition", currTransition, " -> ", transition);
-          transitionState.name = transition;           
+          transitionState.name = transition;
         }
         
         // We are actually transitioning
@@ -859,13 +859,21 @@
       }
       
       function handleViewTransitionEnd(e) {
+        // If multiple properties are transitioned only use the earliest end events and ignore
+        // others
+        if(!transitionState.isInProgress()) {
+          return;
+        }
+        
+        console.log(transitionState);
+        
         var viewElement = e.target, 
             viewId = DOM.data(viewElement, "viewId"),
             view = views[viewId],
             // property = e.propertyName, 
             tType,
             currTransition;
-            
+    
         if(view.isStacked()) {
           transitionState.fromView = null;
           view.show(false);
