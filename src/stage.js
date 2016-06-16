@@ -560,7 +560,11 @@
     View.prototype = {
       constructor: View,
       show: function(bShowing) {
-        (bShowing ? DOM.addClass(this.element, "showing") : DOM.removeClass(this.element, "showing"));
+        if(bShowing === false) {
+          DOM.removeClass(this.element, "showing");
+        }else {
+          DOM.addClass(this.element, "showing");
+        }
         return this;
       },
       bringToTop: function() {
@@ -838,6 +842,7 @@
       
       function unstackViewUI(view, transition) {
         view.unStack("unstack").bringToTop();
+        // console.log(view.element);
         if(!Env.transition.end || !transition) {
           handleViewTransitionEnd({
             target: view.element,
@@ -865,8 +870,6 @@
           return;
         }
         
-        console.log(transitionState);
-        
         var viewElement = e.target, 
             viewId = DOM.data(viewElement, "viewId"),
             view = views[viewId],
@@ -874,11 +877,7 @@
             tType,
             currTransition;
     
-        if(view.isStacked()) {
-          transitionState.fromView = null;
-          view.show(false);
-          tType = "out";
-        }else if(view.isOnTop()) {
+        if(view.isOnTop()) {
           DOM.removeClass(viewPort, "view-transitioning");
           transitionState.toView = null;
           if(view.wasUnStacked()) {
@@ -897,10 +896,15 @@
           transitionState.fromView = null;
           view.reset(["showing", "pop"]);
           tType = "out";
+        }else if(view.isStacked()) {
+          transitionState.fromView = null;
+          view.show(false);
+          tType = "out";
         }
+        
         dispatchViewTransitionEvents(tType, viewElement, viewId);
       }
-          
+        
       instance = {
         pushView: function(viewId, opts) {
           var view = views[viewId], 
