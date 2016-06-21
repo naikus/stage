@@ -567,10 +567,10 @@
         }
         return this;
       },
-      bringToTop: function() {
+      bringIn: function() {
         DOM.addClass(this.element, "in");
       },
-      isOnTop: function() {
+      isIn: function() {
         return DOM.hasClass(this.element, "in");
       },
       stack: function() {
@@ -628,14 +628,11 @@
           viewPort = DOM.selectOne(options.viewport),
           views = {},
           transitionState = {
-            name: "",
+            transition: null,
             fromView: null,
             toView: null,
             isInProgress: function() {
               return this.fromView || this.toView;
-            },
-            clear: function() {
-              this.fromView = this.toView = null;
             }
           },
           viewStack = [],
@@ -647,9 +644,24 @@
         throw new Error("Use a valid element as view port");
       }
       
-      if(options.transition) {
-        DOM.addClass(viewPort, options.transition);
-        transitionState.name = options.transition; 
+      var defaultTransition = getTransition(options.transition);
+      
+      if(defaultTransition) {
+        DOM.addClass(viewPort, defaultTransition.name);
+        transitionState.transition = defaultTransition;
+      }
+      
+      function getTransition(transition) {
+        if(!transition) {
+          return null;
+        }
+        if(typeof transition === "object") {
+          return transition;
+        }
+        return {
+          name: transition || "",
+          property: null
+        };
       }
  
       /**
@@ -693,7 +705,9 @@
       function pushViewInternal(viewId, viewOptions) {
         var view = views[viewId],
             currentView,
-            transition = "transition" in viewOptions ? viewOptions.transition : options.transition,
+            transition = "transition" in viewOptions 
+                ? getTransition(viewOptions.transition) 
+                : defaultTransition,
             transitionUI = function() {
               raf(function() {
                 if(currentView) {
@@ -716,12 +730,12 @@
         
         // Transitions are set on the view port
         // console.debug("pushView(): Using transition ", transition);
-        var currTransition = transitionState.name;
+        var currTransition = transitionState.transition;
         if(currTransition !== transition) {
-          if(currTransition) {DOM.removeClass(viewPort, currTransition);}
-          DOM.addClass(viewPort, transition);
+          if(currTransition) {DOM.removeClass(viewPort, currTransition.name);}
+          DOM.addClass(viewPort, transition.name);
           // console.debug("pushView(): Replacing transition", currTransition, " -> ", transition);
-          transitionState.name = transition;
+          transitionState.transition = transition;
         }
         
         // We are actually transitioning
@@ -762,7 +776,7 @@
         var currentView, 
             view, 
             idx,
-            transition = transitionState.name,
+            transition = transitionState.transition,
             transitionUI = function() {
               raf(function() {
                 popViewUI(currentView, transition);
@@ -811,7 +825,7 @@
       }
       
       function pushViewUI(view, transition) {
-        view.bringToTop();
+        view.bringIn();
         if(!Env.transition.end || !transition) {
           handleViewTransitionEnd({
             target: view.element,
@@ -841,7 +855,7 @@
       }
       
       function unstackViewUI(view, transition) {
-        view.unStack("unstack").bringToTop();
+        view.unStack("unstack").bringIn();
         // console.log(view.element);
         if(!Env.transition.end || !transition) {
           handleViewTransitionEnd({
@@ -875,20 +889,23 @@
             view = views[viewId],
             // property = e.propertyName, 
             tType,
-            currTransition;
+            currTransition = transitionState.transition;
     
-        if(view.isOnTop()) {
+        if(currTransition.property && e.propertyName.indexOf(currTransition.property) === -1) {
+          return;
+        }
+    
+        if(view.isIn()) {
           DOM.removeClass(viewPort, "view-transitioning");
           transitionState.toView = null;
           if(view.wasUnStacked()) {
             // use the transition of view that was unstacked so that it pops or stacks appropriately
             view.reset("unstack");
-            currTransition = transitionState.name;
             if(currTransition !== view.transition) {
-              DOM.removeClass(viewPort, currTransition).addClass(viewPort, view.transition);
+              DOM.removeClass(viewPort, currTransition.name).addClass(viewPort, view.transition.name);
               // console.debug("handleViewTransitionEnd() Replacing transition", currTransition, 
               //    " -> ", view.transition);
-              transitionState.name = view.transition;
+              transitionState.transition = view.transition;
             }
           }
           tType = "in";
