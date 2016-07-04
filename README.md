@@ -1,5 +1,5 @@
 # stage
-#### A simple view lifecycle and management library for HTML5 aps
+#### A simple view lifecycle and management library for HTML5 apps.
 
 
 
