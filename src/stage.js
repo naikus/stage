@@ -8,10 +8,10 @@
     // CommonJS support
     module.exports = stg;
   }else {
-    // We are probably running in the browser    
+    // We are probably running in the browser
     global.Stage = stg;
   }
-  
+
 })(typeof window === "undefined" ? this : window, function(global, undefined) {
   // All global variables that are used in stagejs
   var document = global.document,
@@ -19,8 +19,8 @@
       setInterval = global.setInterval,
       XMLHttpRequest = global.XMLHttpRequest,
       requestAnimationFrame = global.requestAnimationFrame;
-      
-  
+
+
   /* ------------------------------------- Utility Functions ------------------------------------ */
   var Util = (function() {
     // Some utility functions
@@ -34,7 +34,7 @@
 
     var noop = function() {},
         /* @Deadcode
-        createObject = (Object.create || create), 
+        createObject = (Object.create || create),
         */
         AProto = Array.prototype,
         OProto = Object.prototype,
@@ -81,15 +81,15 @@
        * Gets the type of object specified. The type returned is the [[Class]] internal property
        * of the specified object. For build in types the values are:
        * -----------------------------------------------------------
-       * String  
-       * Number  
-       * Boolean 
-       * Date    
-       * Error   
-       * Array   
+       * String
+       * Number
+       * Boolean
+       * Date
+       * Error
+       * Array
        * Function
-       * RegExp  
-       * Object  
+       * RegExp
+       * Object
        *
        * @param {Object} that The object/function/any of which the type is to be determined
        */
@@ -149,7 +149,7 @@
 
   /* --------------------------------------- DOM Functions -------------------------------------- */
   var DOM = (function() {
-    var clsRegExps = {}, 
+    var clsRegExps = {},
         isIe = !!window.ActiveXObject,
         htmlRe = /^\s*<(!--\s*.*)?(\w+)[^>]*>/,
         div = document.createElement("div"),
@@ -164,7 +164,7 @@
           th: tr
         },
         supportsEvent = typeof(window.Event === "function");
-    
+
     function asNodes(nodeName, html, isTable) {
         var frags, c = div.cloneNode();
         html += "";
@@ -172,11 +172,11 @@
         frags = isTable ? c.firstChild.firstChild.childNodes : c.firstChild.childNodes;
         return frags;
     }
-    
+
     function classRe(clazz) {
       // new RegExp("\\b" + clazz + "[^\w-]")
       return clsRegExps[clazz] || (clsRegExps[clazz] =
-          new RegExp("(^|\\s+)" + clazz + "(?:\\s+|$)")); // thank you xui.js :) 
+          new RegExp("(^|\\s+)" + clazz + "(?:\\s+|$)")); // thank you xui.js :)
     }
 
     function _addClass(elem, clName) {
@@ -200,7 +200,7 @@
     function hasClass(element, clName) {
       return classRe(clName).test(element.className);
     }
-    
+
     function createEvent(type, node, options) {
       var event = document.createEvent('Event');
       event.initEvent(type, options.bubbles, options.cancelable);
@@ -234,13 +234,15 @@
               children = asNodes("table", html, true);
           }else {
             c.innerHTML = "" + html;
-            children = c.childNodes;  
+            children = c.childNodes;
           }
         }else {
           c.innerHTML = "" + html;
           children = c.childNodes;
         }
-        
+
+        children = Util.slice(children);
+
         fragment = document.createDocumentFragment();
         for(var i = 0, len = children.length; i < len; i += 1) {
           fragment.appendChild(children[i]);
@@ -305,13 +307,13 @@
         return this;
       },
       data: function(element) {
-        var name = arguments[1], 
-            value = arguments[2], 
+        var name = arguments[1],
+            value = arguments[2],
             data = element.__stagedata__;
         if(!data) {
           data = element.__stagedata__ = {};
         }
-        
+
         if(arguments.length === 2) {
           return data[name];
         }else if(arguments.length === 3) {
@@ -321,7 +323,7 @@
       }
     };
   })();
-  
+
 
 
   /* ----------------------------------- Stage Implementation ----------------------------------- */
@@ -379,9 +381,9 @@
           transition: "slide"
         },
         NO_TRANSITION = "no-transition";
-        
+
     console.log(Env);
-        
+
     /**
      * Makes an XmlHttpRequest request
      * @param {Object} options The options can be
@@ -393,23 +395,23 @@
      *   timeout: The timeout for the request
      * }
      * @returns {undefined}
-     */    
+     */
     function ajax(options) {
-      var xhr = new XMLHttpRequest(), 
+      var xhr = new XMLHttpRequest(),
           wasConnected = false,
           path = options.path,
           method = options.method || "GET",
           success = options.success,
           fail = options.fail,
           timeout = typeof options.timeout === "undefined" ? 30000 : options.timeout;
-          
+
       xhr.open(method, path, true);
       xhr.timeout = timeout;
       // Some headers
       // Add listeners
       xhr.addEventListener("readystatechange", function() {
         var state = xhr.readyState, code;
-         
+
          // This is for safari/chrome where ready state is 4 but status is 0 in case of local
          // files i.e. file://
          if(state === 2 || state === 3) {
@@ -430,7 +432,7 @@
       // Send!
       xhr.send();
     }
-    
+
     /**
      * Appends an inline script element to the specified element
      * @param {String} scriptContent The content of the script
@@ -442,9 +444,9 @@
       script.textContent = scriptContent;
       toElement.appendChild(script);
     }
-    
+
     /**
-     * Adds a script element with a 'src' attribute and appends the script element to specified 
+     * Adds a script element with a 'src' attribute and appends the script element to specified
      * element
      * @param {String} src The source of the script
      * @param {Element} toElement The element to append to
@@ -468,7 +470,7 @@
       script.async = 1;
       toElement.appendChild(script);
     }
-    
+
     /**
      * Loads the view template along with the scripts the view has defined into the viewPort
      * @param {String} path The view template path
@@ -505,16 +507,16 @@
                   });
                 }
               };
-              
+
           scriptElements.forEach(function(script) {
             script.parentNode.removeChild(script);
           });
-              
+
           // set some div attrs
           div.className = "view-holder";
           div.setAttribute("data-view-template", path);
           div.appendChild(viewFragment);
-          
+
           // put it in the viewport so that the scripts load correctly
           viewPort.appendChild(div);
 
@@ -530,16 +532,16 @@
         }
       });
     }
-    
+
     /*
-     * 
+     *
      * View definition
      * {
      *    id: "view-id",
      *    templatePath: "/path/to/template",
      *    factory: factory function that creates view controller
      * }
-     *  
+     *
      */
     function getOrCreateViewDef(viewId) {
       var def = VIEW_DEFS[viewId];
@@ -550,7 +552,7 @@
       }
       return def;
     }
-    
+
     function View(id, elem, controller) {
       this.id = id;
       this.element = elem;
@@ -612,9 +614,9 @@
         }
       }
     };
-    
+
     /**
-     * Creates a Stage instance 
+     * Creates a Stage instance
      * @param {Object} opts The options object as below:
      * {
      *   viewport: The viewPort element selector
@@ -637,20 +639,20 @@
           },
           viewStack = [],
           instance;
-  
+
       console.debug("Stage options ", options);
-          
+
       if(!viewPort || viewPort.nodeType !== 1) {
         throw new Error("Use a valid element as view port");
       }
-      
+
       var defaultTransition = getTransition(options.transition);
-      
+
       if(defaultTransition) {
         DOM.addClass(viewPort, defaultTransition.name);
         transitionState.transition = defaultTransition;
       }
-      
+
       function getTransition(transition) {
         if(!transition) {
           return null;
@@ -663,7 +665,7 @@
           property: null
         };
       }
- 
+
       /**
        * Prepares the view from view definition (as defined by Stage.defineView()). This method
        * calls the factory and creates the view controller specific to this Stage instance
@@ -683,7 +685,7 @@
 
         viewUi.addEventListener(Env.transition.end || "transitionend", handleViewTransitionEnd);
         viewUi.addEventListener(Env.animation.end || "animationend", handleViewTransitionEnd);
-        
+
         // console.debug("Creating view factory for ", viewId);
         viewController = viewDef.factory(instance, viewUi);
         CONTROLLER_METHODS.forEach(function(m) {
@@ -691,11 +693,11 @@
             viewController[m] = noop;
           }
         });
-        
+
         view = views[viewId] = new View(viewId, viewUi, viewController);
         return view;
       }
-      
+
       /**
        * Pushes a view onto the view stack and transitions the old and new views
        * @param {String} viewId The id of the defined view to push
@@ -705,8 +707,8 @@
       function pushViewInternal(viewId, viewOptions) {
         var view = views[viewId],
             currentView,
-            transition = "transition" in viewOptions 
-                ? getTransition(viewOptions.transition) 
+            transition = "transition" in viewOptions
+                ? getTransition(viewOptions.transition)
                 : defaultTransition,
             transitionUI = function() {
               raf(function() {
@@ -716,7 +718,7 @@
                 pushViewUI(view, transition);
               });
             };
-            
+
         // Check if this is an update to current view
         currentView = viewStack.length ? viewStack[viewStack.length - 1] : null;
         if(currentView) {
@@ -727,7 +729,7 @@
           }
           transitionState.fromView = viewOptions.fromView = currentView.id;
         }
-        
+
         // Transitions are set on the view port
         // console.debug("pushView(): Using transition ", transition);
         var currTransition = transitionState.transition;
@@ -737,11 +739,11 @@
           // console.debug("pushView(): Replacing transition", currTransition, " -> ", transition);
           transitionState.transition = transition;
         }
-        
+
         // We are actually transitioning
         DOM.addClass(viewPort, "view-transitioning");
-        
-        // Initialize the view if its a new view 
+
+        // Initialize the view if its a new view
         if(!view) {
           view = prepareView(viewId, viewOptions);
           // Make the dom visible for controller to initialize.
@@ -752,10 +754,10 @@
           // If this view was earlier stacked, remove the 'stack' class
           view.unStack().show(true);
         }
-        
+
         // set the current transition (should we use a stack?)
         view.transition = transition;
-        
+
         if(currentView) {
           currentView.controller.deactivate();
         }
@@ -771,10 +773,10 @@
         }
         viewStack.push(view);
       }
-      
+
       function popViewInternal(viewOptions, toView) {
-        var currentView, 
-            view, 
+        var currentView,
+            view,
             idx,
             transition = transitionState.transition,
             transitionUI = function() {
@@ -783,7 +785,7 @@
                 unstackViewUI(view, transition);
               });
             };
-        
+
         currentView = viewStack.pop();
         if(toView) {
           idx = indexOfView(toView);
@@ -796,15 +798,15 @@
         }else {
           view = viewStack[viewStack.length - 1];
         }
-        
+
         transitionState.toView = view.id;
-        
+
         // Check if this view has a 'stack' class
         view.stack();
         // We are actually transitioning
         DOM.addClass(viewPort, "view-transitioning");
         view.show(true);
-        
+
         currentView.controller.deactivate();
         var viewActivate = view.controller.activate;
         if(viewActivate.length === 2) { // expects acync activation
@@ -817,13 +819,13 @@
           setTimeout(transitionUI, options.transitionDelay);
         }
       }
-      
+
       function indexOfView(viewId) {
         var i, len;
         for(i = 0, len = viewStack.lenth; (i < len && viewStack[i].id !== viewId); i += 1);
         return i === len ? -1 : i;
       }
-      
+
       function pushViewUI(view, transition) {
         view.bringIn();
         if(!Env.transition.end || !transition) {
@@ -833,7 +835,7 @@
           });
         }
       }
-      
+
       function stackViewUI(view, transition) {
         view.stack();
         if(!Env.transition.end || !transition) {
@@ -843,7 +845,7 @@
           });
         }
       }
-      
+
       function popViewUI(view, transition) {
         view.pop();
         if(!Env.transition.end || !transition) {
@@ -853,7 +855,7 @@
           });
         }
       }
-      
+
       function unstackViewUI(view, transition) {
         view.unStack("unstack").bringIn();
         // console.log(view.element);
@@ -864,7 +866,7 @@
           });
         }
       }
-      
+
       function dispatchViewTransitionEvents(type, viewElement, viewId) {
         DOM.dispatchEvent("viewtransition" + type, {
           element: viewPort,
@@ -876,25 +878,25 @@
           element: viewElement
         });
       }
-      
+
       function handleViewTransitionEnd(e) {
         // If multiple properties are transitioned only use the earliest end events and ignore
         // others
         if(!transitionState.isInProgress()) {
           return;
         }
-        
-        var viewElement = e.target, 
+
+        var viewElement = e.target,
             viewId = DOM.data(viewElement, "viewId"),
             view = views[viewId],
-            // property = e.propertyName, 
+            // property = e.propertyName,
             tType,
             currTransition = transitionState.transition;
-    
+
         if(currTransition.property && e.propertyName.indexOf(currTransition.property) === -1) {
           return;
         }
-    
+
         if(view.isIn()) {
           DOM.removeClass(viewPort, "view-transitioning");
           transitionState.toView = null;
@@ -903,7 +905,7 @@
             view.reset("unstack");
             if(currTransition !== view.transition) {
               DOM.removeClass(viewPort, currTransition.name).addClass(viewPort, view.transition.name);
-              // console.debug("handleViewTransitionEnd() Replacing transition", currTransition, 
+              // console.debug("handleViewTransitionEnd() Replacing transition", currTransition,
               //    " -> ", view.transition);
               transitionState.transition = view.transition;
             }
@@ -918,25 +920,25 @@
           view.show(false);
           tType = "out";
         }
-        
+
         dispatchViewTransitionEvents(tType, viewElement, viewId);
       }
-        
+
       instance = {
         pushView: function(viewId, opts) {
-          var view = views[viewId], 
+          var view = views[viewId],
               viewDef,
               viewOptions = Util.shallowCopy({}, opts);
-              
+
           // If we are already transitioning, ignore this call
           if(transitionState.isInProgress()) {
             console.debug("pushView() View transitioin in progress. Ignoring this call");
             return;
           }
-          
+
           // Indicate we are progressing
-          transitionState.toView = viewId; 
-          
+          transitionState.toView = viewId;
+
           if(!view) {
             viewDef = VIEW_DEFS[viewId];
             if(!viewDef) {
@@ -962,7 +964,7 @@
         },
         popView: function(opts) {
           var viewOptions = Util.shallowCopy({}, opts), toViewId = viewOptions.toView;
-          
+
           // If we are already transitioning, ignore this call
           if(transitionState.isInProgress()) {
             console.debug("popView() View transitioin in progress. Ignoring this call");
@@ -971,10 +973,10 @@
           if(viewStack.length <= 1) {
             throw new Error("Can't pop last view");
           }
-          
+
           // Indicate that we are transitionin from current view
           transitionState.fromView = this.currentView();
-          
+
           popViewInternal(viewOptions, toViewId);
         },
         currentView: function() {
@@ -982,10 +984,10 @@
           return currentView ? currentView.id : null;
         }
       };
-      
+
       return instance;
     }
-    
+
 
     /* ------------------------------------ Some static functions ------------------------------- */
 
@@ -1007,8 +1009,8 @@
 
     return Stage;
   })();
-  
-  
+
+
 
   return Stage;
 });
