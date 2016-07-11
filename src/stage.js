@@ -635,6 +635,9 @@
             toView: null,
             isInProgress: function() {
               return this.fromView || this.toView;
+            },
+            clear: function() {
+              this.fromView = this.toView = null;
             }
           },
           viewStack = [],
