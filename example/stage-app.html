@@ -49,7 +49,10 @@
         -moz-user-select: none;
         -webkit-user-select: none;
         -ms-user-select: none;
-        display: none;
+        font-weight: bold;
+        padding: 15px 10px;
+        min-height: 47px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.3);
       }
       .stage-view {
         padding: 10px;
@@ -111,7 +114,7 @@
         <h2 id="btn5">&#187;</h2>
       </div>
     </div>
-    <div id="actionbar"></div>
+    <div id="actionbar">WELCOME</div>
 
     
     
@@ -139,6 +142,16 @@
             document.getElementById("btn3").addEventListener(ACTION, function() {
               stg.pushView('three', {transition: 'fancy'});
             }, false);
+            
+            /*
+             * Simulate delay in beforetransitionin (Should not affect transition smoothness)
+            viewUi.addEventListener("beforetransitionin", function(e) {
+              for(var i = 0; i < 10000; i += 1) {
+                console.log("I is " + i);
+              }
+              console.log("Done before transition in");
+            }, false);
+            */
           }
         };
       });

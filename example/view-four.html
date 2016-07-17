@@ -12,8 +12,15 @@
             stg.popView();
           }, false);
         },
-        activate: function(opts) {
-          // console.log(opts);
+        activate: function(opts, done) {
+          var counter = 5, timerId, counterElem = document.getElementById("actionbar");
+          timerId = setInterval(function() {
+            if(!counter) {
+              clearInterval(timerId);
+              done();
+            }
+            counterElem.innerHTML = (counter--);
+          }, 500);
         }
       };
     });

@@ -714,6 +714,9 @@
                 ? getTransition(viewOptions.transition)
                 : defaultTransition,
             transitionUI = function() {
+              if(currentView) dispatchBeforeViewTransitionEvent("out", currentView);
+              dispatchBeforeViewTransitionEvent("in", view);
+              
               raf(function() {
                 if(currentView) {
                   stackViewUI(currentView, transition);
@@ -783,6 +786,9 @@
             idx,
             transition = transitionState.transition,
             transitionUI = function() {
+              dispatchBeforeViewTransitionEvent("out", currentView);
+              dispatchBeforeViewTransitionEvent("in", view);
+              
               raf(function() {
                 popViewUI(currentView, transition);
                 unstackViewUI(view, transition);
@@ -830,7 +836,6 @@
       }
 
       function pushViewUI(view, transition) {
-        // dispatchBeforeViewTransitionEvent("in", view);
         view.bringIn();
         if(!Env.transition.end || !transition) {
           handleViewTransitionEnd({
@@ -841,7 +846,6 @@
       }
 
       function stackViewUI(view, transition) {
-        // dispatchBeforeViewTransitionEvent("out", view);
         view.stack();
         if(!Env.transition.end || !transition) {
           handleViewTransitionEnd({
@@ -852,7 +856,6 @@
       }
 
       function popViewUI(view, transition) {
-        // dispatchBeforeViewTransitionEvent("out", view);
         view.pop();
         if(!Env.transition.end || !transition) {
           handleViewTransitionEnd({
@@ -863,7 +866,6 @@
       }
 
       function unstackViewUI(view, transition) {
-        // dispatchBeforeViewTransitionEvent("in", view);
         view.unStack("unstack").bringIn();
         // console.log(view.element);
         if(!Env.transition.end || !transition) {
