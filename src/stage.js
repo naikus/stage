@@ -830,6 +830,7 @@
       }
 
       function pushViewUI(view, transition) {
+        // dispatchBeforeViewTransitionEvent("in", view);
         view.bringIn();
         if(!Env.transition.end || !transition) {
           handleViewTransitionEnd({
@@ -840,6 +841,7 @@
       }
 
       function stackViewUI(view, transition) {
+        // dispatchBeforeViewTransitionEvent("out", view);
         view.stack();
         if(!Env.transition.end || !transition) {
           handleViewTransitionEnd({
@@ -850,6 +852,7 @@
       }
 
       function popViewUI(view, transition) {
+        // dispatchBeforeViewTransitionEvent("out", view);
         view.pop();
         if(!Env.transition.end || !transition) {
           handleViewTransitionEnd({
@@ -860,6 +863,7 @@
       }
 
       function unstackViewUI(view, transition) {
+        // dispatchBeforeViewTransitionEvent("in", view);
         view.unStack("unstack").bringIn();
         // console.log(view.element);
         if(!Env.transition.end || !transition) {
@@ -870,15 +874,29 @@
         }
       }
 
-      function dispatchViewTransitionEvents(type, viewElement, viewId) {
+      function dispatchViewTransitionEvents(type, view) {
         DOM.dispatchEvent("viewtransition" + type, {
           element: viewPort,
           data: {
-            viewId: viewId
+            viewId: view.id
           }
         });
         DOM.dispatchEvent("transition" + type, {
-          element: viewElement
+          element: view.element
+        });
+      }
+      
+      function dispatchBeforeViewTransitionEvent(tType, view) {
+        DOM.dispatchEvent("beforeviewtransition" + tType, {
+          element: viewPort,
+          cancelable: true,
+          data: {
+            viewId: view.id
+          }
+        });
+
+        DOM.dispatchEvent("beforetransition" + tType, {
+          element: view.element
         });
       }
 
@@ -924,7 +942,7 @@
           tType = "out";
         }
 
-        dispatchViewTransitionEvents(tType, viewElement, viewId);
+        dispatchViewTransitionEvents(tType, view);
       }
 
       instance = {
