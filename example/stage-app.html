@@ -40,6 +40,7 @@
         top: 0;
         left: 0;
         background-color: #456;
+        border-bottom: 1px solid #345;
         color: #fff;
         padding: 10px;
         font-weight: normal;
@@ -51,8 +52,8 @@
         -ms-user-select: none;
         font-weight: bold;
         padding: 15px 10px;
-        min-height: 47px;
-        box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        min-height: 49px;
+        /*box-shadow: 0 0 5px rgba(0,0,0,0.6);*/
       }
       .stage-view {
         padding: 10px;
@@ -175,7 +176,10 @@
           actionbar = document.getElementById("actionbar");
       viewPort.addEventListener("viewtransitionin", function(e) {
         actionbar.innerHTML = "VIEW " + e.viewId.toUpperCase();
-      });
+      }, false);
+      viewPort.addEventListener("beforeviewtransitionin", function() {
+        actionbar.innerHTML = "";
+      }, false);
       
       var stage = Stage({
         // viewport: "#viewPort",
