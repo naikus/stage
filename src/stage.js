@@ -18,6 +18,7 @@
       setTimeout = global.setTimeout,
       setInterval = global.setInterval,
       XMLHttpRequest = global.XMLHttpRequest,
+      getComputedStyle = global.getComputedStyle,
       requestAnimationFrame = global.requestAnimationFrame;
 
 
@@ -150,7 +151,7 @@
   /* --------------------------------------- DOM Functions -------------------------------------- */
   var DOM = (function() {
     var clsRegExps = {},
-        isIe = !!window.ActiveXObject,
+        isIe = !!global.ActiveXObject,
         htmlRe = /^\s*<(!--\s*.*)?(\w+)[^>]*>/,
         div = document.createElement("div"),
         table = document.createElement("table"),
@@ -163,7 +164,7 @@
           td: tr,
           th: tr
         },
-        supportsEvent = typeof(window.Event === "function");
+        supportsEvent = typeof(global.Event === "function");
 
     function asNodes(nodeName, html, isTable) {
         var frags, c = div.cloneNode();
@@ -305,6 +306,9 @@
           }
         }
         return this;
+      },
+      getComputedStyle: function(elem) {
+        return getComputedStyle ? getComputedStyle(elem) : elem.currentStyle;
       },
       data: function(element) {
         var name = arguments[1],
@@ -552,6 +556,8 @@
       }
       return def;
     }
+    
+    
 
     function View(id, elem, controller) {
       this.id = id;
@@ -614,6 +620,65 @@
         }
       }
     };
+    
+    
+    function TransitionTracker() {
+      var name,
+          fromView,
+          toView,
+          progressing = false;
+          eventCount = {};
+      
+      function getTransitionPropertyCount(viewElem) {
+        var style = DOM.getComputedStyle(viewElem), property = style["transition-property"];
+        return property ? property.split(",").length : 0;
+      }
+      
+      return {
+        name: function() {
+          if(arguments.length) {
+            name = arguments[0];
+            return this;
+          }else {
+            return name;
+          }
+        },
+        from: function(view) {
+          fromView = view.id;
+          eventCount[view.id] = getTransitionPropertyCount(view.element);
+          return this;
+        },
+        to: function(view) {
+          toView = view.id;
+          eventCount[view.id] = getTransitionPropertyCount(view.element);
+          return this;
+        },
+        transitionEnded: function(view) {
+          var ended;
+          eventCount[view.id] -= 1;
+          ended = !eventCount[view.id];
+          // progressing = !(!eventCount[fromView] && !eventCount[toView]);
+          progressing = eventCount[fromView] || eventCount[toView];
+          return ended;
+        },
+        inProgress: function() {
+          if(arguments.length) {
+            progressing = arguments[0];
+            return this;
+          }else {
+            return progressing;
+          }
+        },
+        clear: function() {
+          delete eventCount[fromView];
+          delete eventCount[toView];
+          progressing = false;
+          fromView = toView = null;
+        }
+      };
+      
+    }
+    
 
     /**
      * Creates a Stage instance
@@ -629,17 +694,7 @@
       var options = Util.shallowCopy({}, STAGE_DEFAULT_OPTIONS, opts),
           viewPort = DOM.selectOne(options.viewport),
           views = {},
-          transitionState = {
-            transition: null,
-            fromView: null,
-            toView: null,
-            isInProgress: function() {
-              return this.fromView || this.toView;
-            },
-            clear: function() {
-              this.fromView = this.toView = null;
-            }
-          },
+          transitionTracker = TransitionTracker(),
           viewStack = [],
           instance;
 
@@ -649,24 +704,12 @@
         throw new Error("Use a valid element as view port");
       }
 
-      var defaultTransition = getTransition(options.transition);
+      var defaultTransition = options.transition;
 
       if(defaultTransition) {
-        DOM.addClass(viewPort, defaultTransition.name);
-        transitionState.transition = defaultTransition;
-      }
-
-      function getTransition(transition) {
-        if(!transition) {
-          return null;
-        }
-        if(typeof transition === "object") {
-          return transition;
-        }
-        return {
-          name: transition || "",
-          property: null
-        };
+        DOM.addClass(viewPort, defaultTransition);
+        // transitionState.transition = defaultTransition;
+        transitionTracker.name(defaultTransition);
       }
 
       /**
@@ -711,7 +754,7 @@
         var view = views[viewId],
             currentView,
             transition = "transition" in viewOptions
-                ? getTransition(viewOptions.transition)
+                ? viewOptions.transition
                 : defaultTransition,
             transitionUI = function() {
               if(currentView) dispatchBeforeViewTransitionEvent("out", currentView);
@@ -724,6 +767,18 @@
                 pushViewUI(view, transition);
               });
             };
+            
+            
+        // Transitions are set on the view port
+        // console.debug("pushView(): Using transition ", transition);
+        var currTransition = transitionTracker.name();
+        
+        if(currTransition !== transition) {
+          transitionTracker.name(transition);
+          if(currTransition) {DOM.removeClass(viewPort, currTransition);}
+          DOM.addClass(viewPort, transition);
+          // console.debug("pushView(): Replacing transition", currTransition, " -> ", transition);
+        }
 
         // Check if this is an update to current view
         currentView = viewStack.length ? viewStack[viewStack.length - 1] : null;
@@ -733,17 +788,8 @@
             currentView.controller.update(viewOptions);
             return;
           }
-          transitionState.fromView = viewOptions.fromView = currentView.id;
-        }
-
-        // Transitions are set on the view port
-        // console.debug("pushView(): Using transition ", transition);
-        var currTransition = transitionState.transition;
-        if(currTransition !== transition) {
-          if(currTransition) {DOM.removeClass(viewPort, currTransition.name);}
-          DOM.addClass(viewPort, transition.name);
-          // console.debug("pushView(): Replacing transition", currTransition, " -> ", transition);
-          transitionState.transition = transition;
+          transitionTracker.from(currentView);
+          viewOptions.fromView = currentView.id;
         }
 
         // We are actually transitioning
@@ -763,6 +809,7 @@
 
         // set the current transition (should we use a stack?)
         view.transition = transition;
+        transitionTracker.to(view);
 
         if(currentView) {
           currentView.controller.deactivate();
@@ -784,7 +831,7 @@
         var currentView,
             view,
             idx,
-            transition = transitionState.transition,
+            transition = transitionTracker.name(),
             transitionUI = function() {
               dispatchBeforeViewTransitionEvent("out", currentView);
               dispatchBeforeViewTransitionEvent("in", view);
@@ -799,6 +846,8 @@
         if(toView) {
           idx = indexOfView(toView);
           if(idx === -1) {
+            viewStack.push(currentView);
+            transitionTracker.clear();
             throw new Error("View " + toView + " is not on stack");
           }
           view = viewStack[idx];
@@ -808,13 +857,13 @@
           view = viewStack[viewStack.length - 1];
         }
 
-        transitionState.toView = view.id;
-
         // Check if this view has a 'stack' class
         view.stack();
         // We are actually transitioning
         DOM.addClass(viewPort, "view-transitioning");
         view.show(true);
+        
+        transitionTracker.from(currentView).to(view);
 
         currentView.controller.deactivate();
         var viewActivate = view.controller.activate;
@@ -903,48 +952,48 @@
       }
 
       function handleViewTransitionEnd(e) {
-        // If multiple properties are transitioned only use the earliest end events and ignore
-        // others
-        if(!transitionState.isInProgress()) {
-          return;
-        }
-
         var viewElement = e.target,
             viewId = DOM.data(viewElement, "viewId"),
             view = views[viewId],
-            // property = e.propertyName,
             tType,
-            currTransition = transitionState.transition;
+            currTransition,
+            currView;
 
-        if(currTransition.property && e.propertyName.indexOf(currTransition.property) === -1) {
+        if(!transitionTracker.transitionEnded(view)) {
+          // console.log("Transition pending for", view.id, e.propertyName);
           return;
         }
 
         if(view.isIn()) {
-          DOM.removeClass(viewPort, "view-transitioning");
-          transitionState.toView = null;
           if(view.wasUnStacked()) {
             // use the transition of view that was unstacked so that it pops or stacks appropriately
             view.reset("unstack");
-            if(currTransition !== view.transition) {
-              DOM.removeClass(viewPort, currTransition.name).addClass(viewPort, view.transition.name);
-              // console.debug("handleViewTransitionEnd() Replacing transition", currTransition,
-              //    " -> ", view.transition);
-              transitionState.transition = view.transition;
-            }
           }
           tType = "in";
         }else if(view.wasPopped()) {
-          transitionState.fromView = null;
           view.reset(["showing", "pop"]);
           tType = "out";
         }else if(view.isStacked()) {
-          transitionState.fromView = null;
           view.show(false);
           tType = "out";
         }
-
+        
         dispatchViewTransitionEvents(tType, view);
+        
+        if(!transitionTracker.inProgress()) {
+          // console.log("Transition complete!");
+          transitionTracker.clear();
+          DOM.removeClass(viewPort, "view-transitioning");
+          currTransition = transitionTracker.name();
+          currView = viewStack[viewStack.length - 1];
+          if(currTransition !== currView.transition) {
+            DOM.removeClass(viewPort, currTransition)
+                .addClass(viewPort, currView.transition);
+            // console.debug("handleViewTransitionEnd() Replacing transition", currTransition,
+            //    " -> ", view.transition);
+            transitionTracker.name(currView.transition);
+          }
+        }
       }
 
       instance = {
@@ -954,26 +1003,25 @@
               viewOptions = Util.shallowCopy({}, opts);
 
           // If we are already transitioning, ignore this call
-          if(transitionState.isInProgress()) {
-            console.debug("pushView() View transitioin in progress. Ignoring this call");
+          if(transitionTracker.inProgress()) {
+            console.log("pushView() View transitioin in progress. Ignoring this call");
             return;
           }
-
-          // Indicate we are progressing
-          transitionState.toView = viewId;
+          
+          transitionTracker.inProgress(true);
 
           if(!view) {
             viewDef = VIEW_DEFS[viewId];
             if(!viewDef) {
               // clear transition states when there are errors
-              transitionState.clear();
+              transitionTracker.clear();
               throw new Error("Don't know of view: " + viewId);
             }
             if(!viewDef.factory) {
               loadView(viewDef.templatePath, viewPort, function(viewData) {
                 if(viewData.error) {
                   // clear transition states when there are errors
-                  transitionState.clear();
+                  transitionTracker.clear();
                   throw new Error("Error loading view: " + viewData.error);
                 }
                 pushViewInternal(viewId, viewOptions);
@@ -989,16 +1037,16 @@
           var viewOptions = Util.shallowCopy({}, opts), toViewId = viewOptions.toView;
 
           // If we are already transitioning, ignore this call
-          if(transitionState.isInProgress()) {
+          if(transitionTracker.inProgress()) {
             console.debug("popView() View transitioin in progress. Ignoring this call");
             return;
           }
-          if(viewStack.length <= 1) {
-            throw new Error("Can't pop last view");
+          if(viewStack.length < 2) {
+            throw new Error("Can't pop. One or less view(s)");
           }
-
+          
           // Indicate that we are transitionin from current view
-          transitionState.fromView = this.currentView();
+          transitionTracker.inProgress(true);
 
           popViewInternal(viewOptions, toViewId);
         },
