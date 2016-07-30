@@ -1051,8 +1051,27 @@
           popViewInternal(viewOptions, toViewId);
         },
         currentView: function() {
-          var currentView = viewStack[viewStack.length - 1];
-          return currentView ? currentView.id : null;
+          var currView = viewStack[viewStack.length - 1];
+          return currView ? currView.id : null;
+        },
+        previousView: function() {
+          var preView;
+          if(viewStack.length >= 2) {
+            preView = viewStack[viewStack.length - 2];
+            return preView ? preView.id : null;
+          }
+          return null;
+        },
+        indexOfView: function(viewId) {
+          var index = -1;
+          viewStack.some(function(v, i) {
+            if(v.id === viewId) {
+              index = i;
+              return true;
+            }
+            return false;
+          });
+          return index;
         }
       };
 
