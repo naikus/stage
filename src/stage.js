@@ -786,6 +786,7 @@
           if(currentView.id === viewId) {
             // Its just a view update with different options
             currentView.controller.update(viewOptions);
+            transitionTracker.clear();
             return;
           }
           transitionTracker.from(currentView);
@@ -1072,6 +1073,9 @@
             return false;
           });
           return index;
+        },
+        isTransitionInProgress: function() {
+          return transitionTracker.inProgress();
         }
       };
 
