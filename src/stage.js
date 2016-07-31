@@ -1086,6 +1086,16 @@
       def.factory = factory;
     };
 
+    /**
+     * Register multiple views with stage. The object contains view id as key and template path as
+     * value.
+     * {
+     *    "main": "views/main.html",
+     *    "about": "views/about.html" 
+     * }
+     * @param {type} views
+     * @returns {undefined}
+     */
     Stage.views = function(views) {
       var def;
       for(var viewId in views) {
@@ -1095,6 +1105,16 @@
         def = getOrCreateViewDef(viewId);
         def.templatePath = views[viewId];
       }
+    };
+    
+    /**
+     * Register a singel view with stage
+     * @param {type} viewId The id of the view. e.g. "main"
+     * @param {type} templatePath The path of the view template (html) e.g. "views/main.html"
+     */
+    Stage.view = function(viewId, templatePath) {
+      var def = getOrCreateViewDef(viewId);
+      def.templatPath = templatePath;
     };
 
     return Stage;
