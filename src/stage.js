@@ -1114,7 +1114,7 @@
      */
     Stage.view = function(viewId, templatePath) {
       var def = getOrCreateViewDef(viewId);
-      def.templatPath = templatePath;
+      def.templatePath = templatePath;
     };
 
     return Stage;
