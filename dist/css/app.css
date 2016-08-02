@@ -1,0 +1,515 @@
+/**
+ * prism.js tomorrow night eighties for JavaScript, CoffeeScript, CSS and HTML
+ * Based on https://github.com/chriskempson/tomorrow-theme
+ * @author Rose Pritchard
+ */
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #ccc;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+/* Code blocks */
+pre[class*="language-"] {
+  padding: 1em;
+  margin: .5em 0;
+  overflow: auto;
+}
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+  background: #2d2d2d;
+}
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+  padding: .1em;
+  border-radius: .3em;
+  white-space: normal;
+}
+.token.comment,
+.token.block-comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #999;
+}
+.token.punctuation {
+  color: #ccc;
+}
+.token.tag,
+.token.attr-name,
+.token.namespace,
+.token.deleted {
+  color: #e2777a;
+}
+.token.function-name {
+  color: #6196cc;
+}
+.token.boolean,
+.token.number,
+.token.function {
+  color: #f08d49;
+}
+.token.property,
+.token.class-name,
+.token.constant,
+.token.symbol {
+  color: #f8c555;
+}
+.token.selector,
+.token.important,
+.token.atrule,
+.token.keyword,
+.token.builtin {
+  color: #cc99cd;
+}
+.token.string,
+.token.char,
+.token.attr-value,
+.token.regex,
+.token.variable {
+  color: #7ec699;
+}
+.token.operator,
+.token.entity,
+.token.url {
+  color: #67cdcc;
+}
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+.token.italic {
+  font-style: italic;
+}
+.token.entity {
+  cursor: help;
+}
+.token.inserted {
+  color: green;
+}
+.transformNone {
+  -moz-transform: none;
+  -webkit-transform: none;
+  -o-transform: none;
+  -ms-transform: none;
+  transform: none;
+}
+.stage-viewport {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  /*
+  &.view-transitioning {
+    height: 1000%;
+    overflow: hidden;
+  }
+  */
+}
+.stage-view {
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  will-change: transform;
+  transform: translateZ(0);
+  display: none;
+  /* Avoid flickering in webkit browsers, thanks stackoverflow */
+  -webkit-backface-visibility: hidden;
+}
+.stage-view.showing {
+  z-index: 99 !important;
+  display: block !important;
+}
+/* ---------------------------- Slide transition for views ---------------------------- */
+.slide .stage-view {
+  -moz-transform: translate3d(100%, 0, 0);
+  -webkit-transform: translate3d(100%, 0, 0);
+  -o-transform: translate3d(100%, 0, 0);
+  -ms-transform: translate3d(100%, 0, 0);
+  transform: translate3d(100%, 0, 0);
+  -moz-transition: -moz-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -webkit-transition: -webkit-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -o-transition: -o-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -ms-transition: -ms-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  /* For view transitions */
+}
+.slide .stage-view.pop {
+  -moz-transform: translate3d(100%, 0, 0);
+  -webkit-transform: translate3d(100%, 0, 0);
+  -o-transform: translate3d(100%, 0, 0);
+  -ms-transform: translate3d(100%, 0, 0);
+  transform: translate3d(100%, 0, 0);
+}
+.slide .stage-view.in {
+  -moz-transform: none;
+  -webkit-transform: none;
+  -o-transform: none;
+  -ms-transform: none;
+  transform: none;
+}
+.slide .stage-view.stack {
+  z-index: 98;
+  -moz-transform: translate3d(-60%, 0, 0);
+  -webkit-transform: translate3d(-60%, 0, 0);
+  -o-transform: translate3d(-60%, 0, 0);
+  -ms-transform: translate3d(-60%, 0, 0);
+  transform: translate3d(-60%, 0, 0);
+  -moz-transition: -moz-transform 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -webkit-transition: -webkit-transform 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -o-transition: -o-transform 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -ms-transition: -ms-transform 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  transition: transform 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+/* ---------------------------- Slide transition for views ---------------------------- */
+.fade .stage-view {
+  opacity: 0;
+  -moz-transition: opacity 250ms ease;
+  -webkit-transition: opacity 250ms ease;
+  -o-transition: opacity 250ms ease;
+  -ms-transition: opacity 250ms ease;
+  transition: opacity 250ms ease;
+}
+.fade .stage-view.pop {
+  opacity: 0;
+}
+.fade .stage-view.in {
+  opacity: 1;
+}
+.fade .stage-view.stack {
+  z-index: 98;
+  opacity: 0;
+}
+.fancy .stage-view {
+  -moz-transform: translate(100%, 0) scale(1, 1);
+  /**
+   * In older webkits on android, this causes the whole page to jump up and down
+   * when typing, in input fields
+   */
+  -webkit-transform: translate3d(100%, 0, 0) scale(1, 1);
+  -o-transform: translate(100%, 0) scale(1, 1);
+  -ms-transform: translate3d(100%, 0, 0) scale(1, 1);
+  transform: translate3d(100%, 0, 0) scale(1, 1);
+  -moz-transition: -moz-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -webkit-transition: -webkit-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -o-transition: -o-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -ms-transition: -ms-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+.fancy .stage-view.pop {
+  -moz-transform: translate3d(100%, 0, 0);
+  -webkit-transform: translate3d(100%, 0, 0);
+  -o-transform: translate3d(100%, 0, 0);
+  -ms-transform: translate3d(100%, 0, 0);
+  transform: translate3d(100%, 0, 0);
+}
+.fancy .stage-view.in {
+  -moz-transform: none;
+  -webkit-transform: none;
+  -o-transform: none;
+  -ms-transform: none;
+  transform: none;
+}
+.fancy .stage-view.stack {
+  z-index: 98;
+  -moz-transform: translate(-70%, 0) scale(0.8, 0.8);
+  /**
+   * In older webkits on android, this causes the whole page to jump up and down
+   * when typing, in input fields
+   */
+  -webkit-transform: translate3d(-70%, 0, 0) scale(0.8, 0.8);
+  -o-transform: translate(-70%, 0) scale(0.8, 0.8);
+  -ms-transform: translate3d(-70%, 0, 0) scale(0.8, 0.8);
+  transform: translate3d(-70%, 0, 0) scale(0.8, 0.8);
+  -moz-transition: -moz-transform 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -webkit-transition: -webkit-transform 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -o-transition: -o-transform 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -ms-transition: -ms-transform 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  transition: transform 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+.lollipop .stage-view {
+  opacity: 0;
+  -moz-transform: translate3d(0, 80px, 0);
+  -webkit-transform: translate3d(0, 80px, 0);
+  -o-transform: translate3d(0, 80px, 0);
+  -ms-transform: translate3d(0, 80px, 0);
+  transform: translate3d(0, 80px, 0);
+  -moz-transition: -moz-transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
+  -webkit-transition: -webkit-transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
+  -o-transition: -o-transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
+  -ms-transition: -ms-transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
+  transition: transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
+}
+.lollipop .stage-view.pop {
+  -moz-transform: translate3d(0, 80px, 0);
+  -webkit-transform: translate3d(0, 80px, 0);
+  -o-transform: translate3d(0, 80px, 0);
+  -ms-transform: translate3d(0, 80px, 0);
+  transform: translate3d(0, 80px, 0);
+}
+.lollipop .stage-view.in {
+  -moz-transform: none;
+  -webkit-transform: none;
+  -o-transform: none;
+  -ms-transform: none;
+  transform: none;
+  opacity: 1;
+}
+.lollipop .stage-view.stack {
+  -moz-transform: translate3d(0, -50px, 0);
+  -webkit-transform: translate3d(0, -50px, 0);
+  -o-transform: translate3d(0, -50px, 0);
+  -ms-transform: translate3d(0, -50px, 0);
+  transform: translate3d(0, -50px, 0);
+  opacity: 0.8;
+}
+* {
+  /* prevent callout when holding tap on links (the native dialog that comes up) */
+  -webkit-touch-callout: none;
+  /* prevent webkit from resizing text to fit */
+  -webkit-text-size-adjust: none;
+  /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+.border-box {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+article,
+section,
+aside,
+div,
+img,
+p,
+ul,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.box,
+.inline-box,
+input,
+textarea,
+select {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Hevletica, sans-serif;
+}
+.custom .stage-view {
+  -moz-transform: translate3d(0, 10%, 0);
+  -webkit-transform: translate3d(0, 10%, 0);
+  -o-transform: translate3d(0, 10%, 0);
+  -ms-transform: translate3d(0, 10%, 0);
+  transform: translate3d(0, 10%, 0);
+  -moz-transition: -moz-transform 200ms cubic-bezier(0.19, 1, 0.22, 1) 0ms;
+  -webkit-transition: -webkit-transform 200ms cubic-bezier(0.19, 1, 0.22, 1) 0ms;
+  -o-transition: -o-transform 200ms cubic-bezier(0.19, 1, 0.22, 1) 0ms;
+  -ms-transition: -ms-transform 200ms cubic-bezier(0.19, 1, 0.22, 1) 0ms;
+  transition: transform 200ms cubic-bezier(0.19, 1, 0.22, 1) 0ms;
+}
+.custom .stage-view.pop {
+  -moz-transform: translate3d(0, -10%, 0);
+  -webkit-transform: translate3d(0, -10%, 0);
+  -o-transform: translate3d(0, -10%, 0);
+  -ms-transform: translate3d(0, -10%, 0);
+  transform: translate3d(0, -10%, 0);
+  z-index: 98;
+}
+.custom .stage-view.in {
+  -moz-transform: none;
+  -webkit-transform: none;
+  -o-transform: none;
+  -ms-transform: none;
+  transform: none;
+}
+.custom .stage-view.stack {
+  z-index: 98;
+  -moz-transform: translate3d(0, 10%, 0);
+  -webkit-transform: translate3d(0, 10%, 0);
+  -o-transform: translate3d(0, 10%, 0);
+  -ms-transform: translate3d(0, 10%, 0);
+  transform: translate3d(0, 10%, 0);
+  -moz-transition: -moz-transform 100ms cubic-bezier(0.19, 1, 0.22, 1) 0ms;
+  -webkit-transition: -webkit-transform 100ms cubic-bezier(0.19, 1, 0.22, 1) 0ms;
+  -o-transition: -o-transform 100ms cubic-bezier(0.19, 1, 0.22, 1) 0ms;
+  -ms-transition: -ms-transform 100ms cubic-bezier(0.19, 1, 0.22, 1) 0ms;
+  transition: transform 100ms cubic-bezier(0.19, 1, 0.22, 1) 0ms;
+}
+@-moz-keyframes infinite-wait {
+  0% {
+    -moz-transform: translate3d(0, 0, 0);
+  }
+  50% {
+    -moz-transform: translate3d(400%, 0, 0);
+  }
+  100% {
+    -moz-transform: translate3d(0, 0, 0);
+  }
+}
+@-webkit-keyframes infinite-wait {
+  0% {
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+  50% {
+    -webkit-transform: translate3d(400%, 0, 0);
+  }
+  100% {
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+}
+@-keyframes infinite-wait {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(400%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+#loading {
+  z-index: 399;
+  display: none;
+  position: fixed;
+  width: 100%;
+  left: 0;
+  top: 0px;
+  height: 4px;
+}
+#loading > .slider {
+  will-change: transform;
+  width: 20%;
+  height: 2px;
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  -webkit-animation: 5s linear 0s normal none infinite infinite-wait;
+  -moz-animation: 5s linear 0s normal none infinite infinite-wait;
+  animation: 5s linear 0s normal none infinite infinite-wait;
+}
+#loading.show {
+  display: block;
+}
+.header {
+  position: fixed;
+  width: 100%;
+  height: 120px;
+  z-index: 100;
+  left: 0;
+  top: 0;
+}
+.stage-viewport {
+  height: auto;
+  bottom: 0;
+  top: 120px;
+  left: 0;
+}
+.stage-view > .content {
+  padding: 20px;
+}
+.header .logo {
+  padding: 19px 10px 15px 10px;
+  font-weight: bold;
+  font-size: 1.2em;
+  font-family: 'Nothing You Could Do', cursive;
+}
+.header .github {
+  padding: 16px 10px 0;
+}
+.header .logo {
+  float: left;
+}
+.header .github {
+  float: right;
+}
+.header .nav {
+  clear: both;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: auto;
+  overflow: auto;
+}
+.header .nav > li {
+  float: left;
+  display: block;
+  position: relative;
+}
+.header .nav > li > a {
+  display: inline-block;
+  padding: 21px 10px 17px;
+  border-bottom: 5px solid transparent;
+}
+@media screen and (min-width: 340px) {
+  .stage-viewport {
+    height: auto;
+    bottom: 0;
+    top: 60px;
+    left: 0;
+  }
+  .header {
+    height: 60px;
+  }
+  .header .nav {
+    clear: none;
+    float: left;
+    width: auto;
+  }
+}
+/* --------------------------------------- Additional Views ------------------------------------- */
+.stage-view.home .hero {
+  font-size: 1.1em;
+  padding: 30px;
+  text-align: center;
+}
+.stage-view.home .hero h1,
+.stage-view.home .hero h2 {
+  margin: 0;
+  font-family: "Nothing You Could Do", cursive;
+}
+.stage-view.home .content {
+  margin: 0;
+}
+.stage-view.home .footer {
+  min-height: 10px;
+}
+@media screen and (min-width: 600px) {
+  .stage-view.home .content {
+    margin: 0 10%;
+  }
+}

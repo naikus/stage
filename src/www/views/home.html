@@ -1,0 +1,117 @@
+<div class="stage-view home" data-view="home">
+  <div class="hero alt-bg">
+    <h1>Stage.js</h1>
+    <p>A <i>compact</i> library for <i>simple</i> mobile and web SPAs</p>
+    <a class="button info inline" href="#/getting-started">Start Here</a>
+  </div>
+  <div class="content">
+    <section>
+      <h3>Introduction</h3>
+      <p>
+        Stage.js is a compact, standalone library that can be used to develop simple, single page
+        mobile and web apps. Stage.js is very focused and provides a view(page) management 
+        layer for SPAs. It provides view (page) lifecycle and transitions.
+      </p>
+      <p>
+        Stage.js does not depend on any external libraries. You are free to use other libraries
+        like jQuery, Zepto, etc. to manage components inside your views. Stage also supports commonJs
+        environment if available. You can also include other libraries like client side router in
+        conjunction with stage.
+      </p>
+    </section>
+
+    <section>
+      <h3>Usage</h3>
+
+      <p>Write your view</p>
+      <pre><code class="language-html">
+&lt;!-- views/myview.html (partial) --&gt;
+&lt;div class="stage-view myview" data-view="myview"&gt;
+  &lt;h1&gt;My View&lt;/h1&gt;
+  &lt;button id="myBtn"&gt;&lt;/button&gt;
+  &lt;!-- Any external script you want to include --&gt;
+  &lt;script src="four.js"&gt;&lt;/script&gt;
+
+  &lt;!-- You can also put the code below in a js file and add a script tag here --&gt;
+  &lt;script&gt;
+    Stage.defineView("four", function(stageInstance, viewElement) {
+      return {
+        initialize: function() {
+          document.getElementById("myBtn").addEventListener("click", function() {
+            var f = four(); // from four.js
+            stageInstance.showView("about", {f: f});
+          }, false);
+        },
+        activate: function(opts) {},
+        deactivate: function(opts) {}
+      };
+    });
+  &lt;/script&gt;
+&lt;/div&gt;
+      </code></pre>
+
+
+      <p>Write your index.html</p>
+      <pre><code class="language-html">
+&lt;!-- Directory structure --&gt;
+&lt;!--
+myapp
+  + css
+  |  + stage.css
+  + js
+  |  + stage.js
+  + views
+  |   + myview.html
+  + index.html
+--&gt;
+
+&lt;!-- index.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;!-- Include the stage css (or less) --&gt;
+    &lt;link rel="stylesheet" type="text/css" href="css/stage.css" /&gt;
+    &lt;style&gt;
+      #viewPort {
+        width: 300px;
+        height: 450px;
+        position: relative;
+        margin: 1% auto;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div class="stage-viewport" id="viewPort"&gt;&lt;div&gt;
+
+    &lt;script src="js/stage.js"&gt; &lt;/script&gt;
+    &lt;script&gt;
+      var viewPort = document.getElementById("viewPort"),
+          appStage = Stage({
+            // viewport: "#viewPort",
+            viewport: viewPort
+          });
+      
+      // Stage views are defined on the 'Stage' function
+      Stage.views({
+        "myview": "views/myview.html",
+        "about": "views/about.html"
+      });
+      
+      setTimeout(function() {
+        appStage.pushView("myview", /*{transition: "slide"}*/);
+      }, 500);      
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+      </code></pre>
+    </section>
+
+    <p>
+      That's it!
+      Head over to the <a href="#/getting-started">Tutorial</a> for an in-depth tutorial
+    </p>
+    
+  </div>
+  <div class="footer alt-bg"></div>
+  <script src="views/home.js"></script>
+</div>

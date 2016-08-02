@@ -1,0 +1,235 @@
+@alert-color: #9E5B5A;
+@error-color: #D66B55;
+@success-color: #94B75F;
+@warn-color: #F79204;
+@info-color: #4CC3FF;
+@invalid-color: #9B2D2D;
+
+
+
+@base-color: #fcfdfd;
+// Background color for viewport views and other boxes
+@bg-color: #F1F3F6;
+// Background color for overlays, inlays etc.
+@alt-bg-color: #435061;
+// Text color to complement the background color
+@text-color: #495360;// #5a6470;
+// Text color to complement alternate background color
+@alt-text-color: #B9C9CE;
+// Default selected background color
+@selected-bg-color: lighten(@alt-bg-color, 4%);
+@selected-bg-color-alt: #22C6EF;
+// Default selected text color
+@selected-text-color: @text-color;
+
+// Active background color, when an element becomes active i.e. :active class
+@active-bg-color: darken(@selected-bg-color, 6%);
+@active-text-color: @text-color;
+
+@primary-action-bg-color: #25D0A2; //#3FD9F4; //#48c9c7;
+@primary-action-text-color: @bg-color;
+
+@secondary-action-bg-color: #405371;
+@secondary-action-text-color: #fff;
+
+@toolbar-bg-color: darken(@alt-bg-color, 3%);
+@toolbar-text-color: @text-color;
+
+
+.border-box {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+
+.info {
+  background-color: @info-color;
+  color: #fff;
+}
+.info-text {
+  color: darken(@info-color, 30%);
+}
+.success {
+  background-color: @success-color;
+  color: #fff;
+}
+.success-text {
+  color: @success-color;
+}
+.error {
+  background-color: @error-color;
+  color: #fff;
+}
+.error-text {
+  color: @error-color;
+}
+.warn {
+  background-color: @warn-color;
+  color: #fff;
+}
+.warn-text {
+  color: @warn-color;
+}
+.indicate {
+  background-color: @error-color;
+}
+.indicate-alt {
+  color: @error-color;
+}
+
+
+html, body {
+  background-color: lighten(@alt-bg-color, 15%);
+  color: @text-color;
+  font-size: 1em;
+}
+
+a {
+  color: @info-color;
+  text-decoration: none;
+}
+
+img {
+  border: none;
+}
+
+.stage-view {
+  background-color: @bg-color;
+  color: @text-color;
+}
+
+.alt-bg {
+  background-color: @alt-bg-color;
+  color: @alt-text-color;
+}
+
+
+// form controls
+input,
+      button,
+      select,
+      textarea,
+      .button {
+   padding: 10px;
+   font-size: 1em;
+   // border: 1px solid rgba(0,0,0,0.07);
+   border: 1px solid transparent;
+   border-radius: 2px;
+   display: block;
+   position: relative;
+   width: 100%;
+   margin: 0;
+   margin-bottom: 10px;
+   // background-color: lighten(@bg-color, 5%);
+   background-color: darken(@bg-color, 3%);
+   color: @text-color;
+
+   -webkit-appearance: caret;
+   .border-box;
+
+   &::-moz-focus-inner {
+      outline: 0;
+      border: 0;
+   }
+
+   &:focus {
+      border-bottom-color: @selected-bg-color-alt;
+      // box-shadow: 0 0 2px lighten(@active-bg-color, 10%);
+      outline: 0;
+   }
+
+   &[disabled], &.disabled {
+      background-color: darken(@bg-color, 10%) !important;
+   }
+
+   &.inline {
+      display: inline-block;
+      width: auto;
+   }
+}
+
+.colored-buttons(@bgcolor: @info-color, @color: #fff) {
+  background-color: @bgcolor;
+  color: @color;
+  
+  &:hover {
+    background-color: darken(@bgcolor, 10%);
+  }
+  &.active, &:active {
+    background-color: darken(@bgcolor, 15%);
+  }
+}
+
+.button, button, input[type=button] {
+  &.success {
+    .colored-buttons(@success-color);
+  }
+  &.info {
+    .colored-buttons(@info-color);
+  }
+  &.warn {
+    .colored-buttons(@warn-color);
+  }
+  &.error {
+    .colored-buttons(@error-color);
+  }
+}
+
+
+#loading {
+  background-color: rgba(0,0,0,0.15);
+  > .slider {
+    background-color: @selected-bg-color-alt;
+  }
+}
+
+.header {
+  background-color: darken(@alt-bg-color, 7%);
+  color: lighten(@alt-text-color, 5%);
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  border-bottom: 1px solid rgba(0,0,0,0.2);
+  .logo {
+    color: lighten(@info-color, 10%);
+  }
+  .nav {
+
+    > li {
+      > a {
+        color: @alt-text-color;
+        &:active, &.active {
+          background-color: rgba(0,0,0,0.06);
+          color: @primary-action-text-color;
+        }
+        &.active {
+          border-bottom-color: @primary-action-bg-color;
+        }
+      }
+    }
+  }
+}
+
+
+.stage-view{
+  > .content {
+    line-height: 1.5em;
+    font-size: 1.05em;
+  }
+
+  pre[class*="language-"] {
+    background: darken(@alt-bg-color, 15%);
+    line-height: 7px;
+    font-size: 0.9em;
+  }
+}
+
+
+
+/* View specific styling */
+.stage-view.home {
+  .hero {
+    h1, h2 {
+      color: lighten(@info-color, 10%);
+    }
+  }
+}

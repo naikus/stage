@@ -1,0 +1,25 @@
+<div class="stage-view getting-started" data-view="getting-started">
+  <style scoped>
+    img.coming-soon {
+      display: block;
+      width: 200px;
+      height: auto;
+      margin: 5% auto 10px;
+    }
+    .coming-soon-msg {
+      text-align: center;
+    }
+  </style>
+  <div class="content">
+    <img class="coming-soon" src="images/under-construction_0.svg" alt="Coming soon..." />
+    <p class="coming-soon-msg">
+      I'm still working on this page. Please check back later...
+    </p>
+  </div>
+  <script>
+      var Stage = require("stage");
+      Stage.defineView("getting-started", function(AppStage, viewUi) {
+        return {};
+      });
+  </script>
+</div>

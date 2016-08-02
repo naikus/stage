@@ -1,0 +1,154 @@
+@import (less) "../../../node_modules/prismjs/themes/prism-tomorrow.css";
+
+
+
+
+
+@import "../../../node_modules/stage/src/stage.less";
+
+
+* {
+  /* prevent callout when holding tap on links (the native dialog that comes up) */
+  -webkit-touch-callout: none;
+
+  /* prevent webkit from resizing text to fit */
+  -webkit-text-size-adjust: none;
+
+  /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+.border-box {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+article, section, aside, div, img, p, ul, li, h1, h2, h3, h4, h5, h6, .box, .inline-box, input,
+textarea, select {
+  .border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: Hevletica, sans-serif;
+}
+
+.custom {
+  .stage-view {
+    .translate(0, 10%);
+    .transition-transform(200ms, cubic-bezier(0.19, 1, 0.22, 1));
+    
+    &.pop {
+      .translate(0, -10%);
+      z-index: 98;
+    }
+
+    &.in {
+      // .translateX(0); Fixed position elements won't work with this
+      .transformNone;
+    }
+    
+    &.stack {
+      z-index: 98;
+      .translate(0, 10%);
+      //.transition-transform(350ms, ease);
+      .transition-transform(100ms, cubic-bezier(0.19, 1, 0.22, 1));
+    }
+  }
+}
+
+
+
+@import "loading.less";
+
+
+@header-height: 120px;
+
+.header {
+  position: fixed;
+  width: 100%;
+  height: @header-height;
+  z-index: 100;
+  left: 0;
+  top: 0;
+}
+
+.stage-viewport {
+  height: auto;
+  bottom: 0;
+  top: @header-height;
+  left: 0;
+}
+
+.stage-view {
+  > .content {
+    padding: 20px;
+  }
+}
+
+.header {
+  .logo {
+    padding: 19px 10px 15px 10px;
+    font-weight: bold;
+    // letter-spacing: 0.3em;
+    font-size: 1.2em;
+    font-family: 'Nothing You Could Do', cursive;
+  }
+  .github {
+    padding: 16px 10px 0;
+  }
+  .logo {
+    float: left;
+  }
+  .github {
+    float: right;
+  }
+
+  .nav {
+    // min-width: 230px;
+    clear: both;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+
+    width: 100%;
+    height: auto;
+    overflow: auto;
+
+    > li {
+      float: left;
+      display: block;
+      position: relative;
+
+      > a {
+        display: inline-block;
+        padding: 21px 10px 17px;
+        border-bottom: 5px solid transparent;
+      }
+    }
+  }
+}
+
+
+@media screen and (min-width: 340px) {
+  .stage-viewport {
+    height: auto;
+    bottom: 0;
+    top: @header-height / 2;
+    left: 0;
+  }
+  .header {
+    height: @header-height / 2;
+    .nav {
+      clear: none;
+      float: left;
+      width: auto;
+    }
+  }
+}
+
+
+/* --------------------------------------- Additional Views ------------------------------------- */
+@import "views.less";

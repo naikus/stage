@@ -1,0 +1,63 @@
+@-moz-keyframes infinite-wait {
+   0% {
+       -moz-transform: translate3d(0, 0, 0);
+   }
+   50% {
+       -moz-transform: translate3d(400%, 0, 0);
+   }
+   100% {
+       -moz-transform: translate3d(0, 0, 0);
+   }
+}
+@-webkit-keyframes infinite-wait {
+   0% {
+       -webkit-transform: translate3d(0, 0, 0);
+   }
+   50% {
+       -webkit-transform: translate3d(400%, 0, 0);
+   }
+   100% {
+       -webkit-transform: translate3d(0, 0, 0);
+   }
+}
+@-keyframes infinite-wait {
+   0% {
+       transform: translate3d(0, 0, 0);
+   }
+   50% {
+       transform: translate3d(400%, 0, 0);
+   }
+   100% {
+       transform: translate3d(0, 0, 0);
+   }
+}
+
+#loading {
+  z-index: 399;
+  display: none;
+  position: fixed;
+  width: 100%;
+  left: 0;
+  top: 0px;
+  height: 4px;
+  // background-color: rgba(0,0,0,0.1);
+  
+  > .slider {
+    will-change: transform;
+    width: 20%;
+    height: 2px;
+    // background-color: rgba(0,0,0,0.15);
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    
+    -webkit-animation: 5s linear 0s normal none infinite infinite-wait;
+    -moz-animation: 5s linear 0s normal none infinite infinite-wait;
+    animation: 5s linear 0s normal none infinite infinite-wait;
+  }
+  
+  &.show {
+    display: block;
+  }
+}

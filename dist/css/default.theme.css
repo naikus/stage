@@ -1,0 +1,233 @@
+.border-box {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.info {
+  background-color: #4CC3FF;
+  color: #fff;
+}
+.info-text {
+  color: #0076b2;
+}
+.success {
+  background-color: #94B75F;
+  color: #fff;
+}
+.success-text {
+  color: #94B75F;
+}
+.error {
+  background-color: #D66B55;
+  color: #fff;
+}
+.error-text {
+  color: #D66B55;
+}
+.warn {
+  background-color: #F79204;
+  color: #fff;
+}
+.warn-text {
+  color: #F79204;
+}
+.indicate {
+  background-color: #D66B55;
+}
+.indicate-alt {
+  color: #D66B55;
+}
+html,
+body {
+  background-color: #62758e;
+  color: #495360;
+  font-size: 1em;
+}
+a {
+  color: #4CC3FF;
+  text-decoration: none;
+}
+img {
+  border: none;
+}
+.stage-view {
+  background-color: #F1F3F6;
+  color: #495360;
+}
+.alt-bg {
+  background-color: #435061;
+  color: #B9C9CE;
+}
+input,
+button,
+select,
+textarea,
+.button {
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  display: block;
+  position: relative;
+  width: 100%;
+  margin: 0;
+  margin-bottom: 10px;
+  background-color: #e8ebf0;
+  color: #495360;
+  -webkit-appearance: caret;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+input::-moz-focus-inner,
+button::-moz-focus-inner,
+select::-moz-focus-inner,
+textarea::-moz-focus-inner,
+.button::-moz-focus-inner {
+  outline: 0;
+  border: 0;
+}
+input:focus,
+button:focus,
+select:focus,
+textarea:focus,
+.button:focus {
+  border-bottom-color: #22C6EF;
+  outline: 0;
+}
+input[disabled],
+button[disabled],
+select[disabled],
+textarea[disabled],
+.button[disabled],
+input.disabled,
+button.disabled,
+select.disabled,
+textarea.disabled,
+.button.disabled {
+  background-color: #d2d8e2 !important;
+}
+input.inline,
+button.inline,
+select.inline,
+textarea.inline,
+.button.inline {
+  display: inline-block;
+  width: auto;
+}
+.button.success,
+button.success,
+input[type=button].success {
+  background-color: #94B75F;
+  color: #fff;
+}
+.button.success:hover,
+button.success:hover,
+input[type=button].success:hover {
+  background-color: #7a9d46;
+}
+.button.success.active,
+button.success.active,
+input[type=button].success.active,
+.button.success:active,
+button.success:active,
+input[type=button].success:active {
+  background-color: #6d8b3f;
+}
+.button.info,
+button.info,
+input[type=button].info {
+  background-color: #4CC3FF;
+  color: #fff;
+}
+.button.info:hover,
+button.info:hover,
+input[type=button].info:hover {
+  background-color: #19b2ff;
+}
+.button.info.active,
+button.info.active,
+input[type=button].info.active,
+.button.info:active,
+button.info:active,
+input[type=button].info:active {
+  background-color: #00a9ff;
+}
+.button.warn,
+button.warn,
+input[type=button].warn {
+  background-color: #F79204;
+  color: #fff;
+}
+.button.warn:hover,
+button.warn:hover,
+input[type=button].warn:hover {
+  background-color: #c57403;
+}
+.button.warn.active,
+button.warn.active,
+input[type=button].warn.active,
+.button.warn:active,
+button.warn:active,
+input[type=button].warn:active {
+  background-color: #ac6603;
+}
+.button.error,
+button.error,
+input[type=button].error {
+  background-color: #D66B55;
+  color: #fff;
+}
+.button.error:hover,
+button.error:hover,
+input[type=button].error:hover {
+  background-color: #c84a30;
+}
+.button.error.active,
+button.error.active,
+input[type=button].error.active,
+.button.error:active,
+button.error:active,
+input[type=button].error:active {
+  background-color: #b3422b;
+}
+#loading {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+#loading > .slider {
+  background-color: #22C6EF;
+}
+.header {
+  background-color: #343f4c;
+  color: #c8d5d9;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+.header .logo {
+  color: #7fd4ff;
+}
+.header .nav > li > a {
+  color: #B9C9CE;
+}
+.header .nav > li > a:active,
+.header .nav > li > a.active {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #F1F3F6;
+}
+.header .nav > li > a.active {
+  border-bottom-color: #25D0A2;
+}
+.stage-view > .content {
+  line-height: 1.5em;
+  font-size: 1.05em;
+}
+.stage-view pre[class*="language-"] {
+  background: #242b34;
+  line-height: 7px;
+  font-size: 0.9em;
+}
+/* View specific styling */
+.stage-view.home .hero h1,
+.stage-view.home .hero h2 {
+  color: #7fd4ff;
+}
