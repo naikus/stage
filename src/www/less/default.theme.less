@@ -192,11 +192,20 @@ input,
   .logo {
     color: lighten(@info-color, 10%);
   }
+  .github {
+    border-bottom: 5px solid transparent;
+    &:active {
+      background-color: rgba(0,0,0,0.06);
+      color: @primary-action-text-color;
+      border-bottom-color: @primary-action-bg-color;
+    }
+  }
   .nav {
 
     > li {
       > a {
         color: @alt-text-color;
+        border-bottom: 5px solid transparent;
         &:active, &.active {
           background-color: rgba(0,0,0,0.06);
           color: @primary-action-text-color;
@@ -213,7 +222,7 @@ input,
 .stage-view{
   > .content {
     line-height: 1.5em;
-    font-size: 1.05em;
+    font-size: 1em;
   }
 
   pre[class*="language-"] {

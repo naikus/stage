@@ -206,8 +206,17 @@ input[type=button].error:active {
 .header .logo {
   color: #7fd4ff;
 }
+.header .github {
+  border-bottom: 5px solid transparent;
+}
+.header .github:active {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #F1F3F6;
+  border-bottom-color: #25D0A2;
+}
 .header .nav > li > a {
   color: #B9C9CE;
+  border-bottom: 5px solid transparent;
 }
 .header .nav > li > a:active,
 .header .nav > li > a.active {
