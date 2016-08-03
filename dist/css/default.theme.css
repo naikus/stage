@@ -228,7 +228,7 @@ input[type=button].error:active {
 }
 .stage-view > .content {
   line-height: 1.5em;
-  font-size: 1.05em;
+  font-size: 1em;
 }
 .stage-view pre[class*="language-"] {
   background: #242b34;
