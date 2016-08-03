@@ -89,6 +89,7 @@ html, body {
 }
 
 .header {
+  .border-box;
   .logo {
     padding: 19px 10px 15px 10px;
     font-weight: bold;
@@ -98,7 +99,7 @@ html, body {
   }
   .github {
     display: block;
-    padding: 16px 10px 9px;
+    padding: 16px 10px 10px;
   }
   .logo {
     float: left;
@@ -109,6 +110,7 @@ html, body {
 
   .nav {
     // min-width: 230px;
+    border-top: 1px solid rgba(0,0,0,0.09);
     clear: both;
     list-style-type: none;
     padding: 0;
@@ -125,7 +127,7 @@ html, body {
 
       > a {
         display: inline-block;
-        padding: 21px 10px 17px;
+        padding: 19px 10px 17px;
       }
     }
   }
@@ -142,9 +144,16 @@ html, body {
   .header {
     height: @header-height / 2;
     .nav {
+      border-top: none;
       clear: none;
       float: left;
       width: auto;
+
+      > li {
+        > a {
+          padding-top: 21px;
+        }
+      }
     }
   }
 }

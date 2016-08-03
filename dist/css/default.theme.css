@@ -44,7 +44,7 @@ body {
   font-size: 1em;
 }
 a {
-  color: #4CC3FF;
+  color: #32baff;
   text-decoration: none;
 }
 img {
@@ -200,19 +200,15 @@ input[type=button].error:active {
 .header {
   background-color: #343f4c;
   color: #c8d5d9;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 .header .logo {
   color: #7fd4ff;
 }
-.header .github {
-  border-bottom: 5px solid transparent;
-}
 .header .github:active {
   background-color: rgba(0, 0, 0, 0.06);
   color: #F1F3F6;
-  border-bottom-color: #25D0A2;
 }
 .header .nav > li > a {
   color: #B9C9CE;

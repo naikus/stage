@@ -441,6 +441,11 @@ body {
 .stage-view > .content {
   padding: 20px;
 }
+.header {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
 .header .logo {
   padding: 19px 10px 15px 10px;
   font-weight: bold;
@@ -449,7 +454,7 @@ body {
 }
 .header .github {
   display: block;
-  padding: 16px 10px 9px;
+  padding: 16px 10px 10px;
 }
 .header .logo {
   float: left;
@@ -458,6 +463,7 @@ body {
   float: right;
 }
 .header .nav {
+  border-top: 1px solid rgba(0, 0, 0, 0.09);
   clear: both;
   list-style-type: none;
   padding: 0;
@@ -473,7 +479,7 @@ body {
 }
 .header .nav > li > a {
   display: inline-block;
-  padding: 21px 10px 17px;
+  padding: 19px 10px 17px;
 }
 @media screen and (min-width: 340px) {
   .stage-viewport {
@@ -486,9 +492,13 @@ body {
     height: 60px;
   }
   .header .nav {
+    border-top: none;
     clear: none;
     float: left;
     width: auto;
+  }
+  .header .nav > li > a {
+    padding-top: 21px;
   }
 }
 /* --------------------------------------- Additional Views ------------------------------------- */

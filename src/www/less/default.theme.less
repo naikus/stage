@@ -86,7 +86,7 @@ html, body {
 }
 
 a {
-  color: @info-color;
+  color: darken(@info-color, 5%);
   text-decoration: none;
 }
 
@@ -187,17 +187,17 @@ input,
 .header {
   background-color: darken(@alt-bg-color, 7%);
   color: lighten(@alt-text-color, 5%);
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
   border-bottom: 1px solid rgba(0,0,0,0.2);
   .logo {
     color: lighten(@info-color, 10%);
   }
   .github {
-    border-bottom: 5px solid transparent;
+    // border-bottom: 5px solid transparent;
     &:active {
       background-color: rgba(0,0,0,0.06);
       color: @primary-action-text-color;
-      border-bottom-color: @primary-action-bg-color;
+      // border-bottom-color: @primary-action-bg-color;
     }
   }
   .nav {
