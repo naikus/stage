@@ -2224,6 +2224,9 @@ module.exports = Router;
       }
 
       instance = {
+        getViewPort: function() {
+          return viewPort;
+        },
         pushView: function(viewId, opts) {
           var view = views[viewId],
               viewDef,
