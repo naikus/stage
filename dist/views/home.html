@@ -91,14 +91,17 @@ myapp
             viewport: viewPort
           });
       
-      // Stage views are defined on the 'Stage' function
+      // Stage views are register on the 'Stage' function
       Stage.views({
         "myview": "views/myview.html",
         "about": "views/about.html"
       });
-      
+
+      // You can also register single views 
+      Stage.view("myView", "views/myview.html");
+
       setTimeout(function() {
-        appStage.pushView("myview", /*{transition: "slide"}*/);
+        appStage.pushView("myview" /*, {transition: "slide"}*/);
       }, 500);      
     &lt;/script&gt;
   &lt;/body&gt;
@@ -112,6 +115,8 @@ myapp
     </p>
     
   </div>
-  <div class="footer alt-bg"></div>
+  <div class="footer alt-bg">
+    <span class="text-x-small">Made using stage.js</span>
+  </div>
   <script src="views/home.js"></script>
 </div>

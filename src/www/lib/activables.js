@@ -137,7 +137,7 @@
         container.removeEventListener(touchend, end, false);
       }
     };
-  };
+  }
   
   return Activables;
 });

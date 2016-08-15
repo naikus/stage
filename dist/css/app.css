@@ -327,6 +327,9 @@ body {
   padding: 0;
   font-family: Hevletica, sans-serif;
 }
+.text-x-small {
+  font-size: 0.7em;
+}
 .custom .stage-view {
   -moz-transform: translate3d(0, 10%, 0);
   -webkit-transform: translate3d(0, 10%, 0);
@@ -516,7 +519,7 @@ body {
   margin: 0;
 }
 .stage-view.home .footer {
-  min-height: 10px;
+  padding: 5px;
 }
 @media screen and (min-width: 600px) {
   .stage-view.home .content {
