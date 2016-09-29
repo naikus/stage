@@ -34,7 +34,7 @@
 
   &lt;!-- You can also put the code below in a js file and add a script tag here --&gt;
   &lt;script&gt;
-    Stage.defineView("four", function(stageInstance, viewElement) {
+    Stage.defineView("myview", function(stageInstance, viewElement) {
       return {
         initialize: function() {
           document.getElementById("myBtn").addEventListener("click", function() {
@@ -53,18 +53,6 @@
 
       <p>Write your index.html</p>
       <pre><code class="language-html">
-&lt;!-- Directory structure --&gt;
-&lt;!--
-myapp
-  + css
-  |  + stage.css
-  + js
-  |  + stage.js
-  + views
-  |   + myview.html
-  + index.html
---&gt;
-
 &lt;!-- index.html --&gt;
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
@@ -91,7 +79,7 @@ myapp
             viewport: viewPort
           });
       
-      // Stage views are register on the 'Stage' function
+      // Stage views are registered on the 'Stage' function
       Stage.views({
         "myview": "views/myview.html",
         "about": "views/about.html"
@@ -118,5 +106,27 @@ myapp
   <div class="footer alt-bg">
     <span class="text-x-small">Made using stage.js</span>
   </div>
-  <script src="views/home.js"></script>
+  <script>
+    (function() {
+      var Stage = require("stage"), 
+          Prism = require("prismjs");
+
+      Stage.defineView("home", function(AppStage, viewUi) {
+        
+        function highlightCodeBlocks() {
+          var blocks = viewUi.getElementsByTagName("code");
+          Array.prototype.forEach.call(blocks, function(elem) {
+            Prism.highlightElement(elem);
+          });
+        }
+
+        return {
+          initialize: function(opts) {
+            highlightCodeBlocks();
+          }
+        };
+      });
+
+    })();
+  </script>
 </div>

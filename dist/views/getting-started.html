@@ -11,15 +11,34 @@
     }
   </style>
   <div class="content">
+    <!-- 
     <img class="coming-soon" src="images/under-construction_0.svg" alt="Coming soon..." />
     <p class="coming-soon-msg">
       I'm still working on this page. Please check back later...
     </p>
+    -->
+    <section>
+      <h3>Tutorial: Build a sample 2 view app</h3>
+
+      <p>
+        Download the stage.js distribution. Now let's start with the directory structure. 
+        Create a following structure:
+      </p>
+      <pre>
+        <code class="language-html">
+&lt;!-- Directory structure --&gt;
+myapp
+  + css
+  |  + stage.css
+  + js
+  |  + stage.js
+  + views
+  |   + home.html
+  |   + about.html
+  + index.html
+        </code>
+      </pre>
+    </section>
   </div>
-  <script>
-      var Stage = require("stage");
-      Stage.defineView("getting-started", function(AppStage, viewUi) {
-        return {};
-      });
-  </script>
+  <script src="views/getting-started.js"></script>
 </div>

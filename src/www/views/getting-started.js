@@ -2,7 +2,7 @@
   var Stage = require("stage"), 
       Prism = require("prismjs");
 
-  Stage.defineView("home", function(AppStage, viewUi) {
+  Stage.defineView("getting-started", function(AppStage, viewUi) {
     
     function highlightCodeBlocks() {
       var blocks = viewUi.getElementsByTagName("code");
