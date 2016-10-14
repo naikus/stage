@@ -124,6 +124,10 @@
     <script src="stage.js"> </script>
     <script>
       var ACTION = ("ontouchstart" in document.documentElement) ? "touchstart" : "click";
+
+      var viewPort = document.getElementById("viewPort"),
+          actionbar = document.getElementById("actionbar");
+
       
       Stage.defineView("one", function(stg, viewUi) {
         return {
@@ -134,6 +138,7 @@
           }
         };
       });
+
       Stage.defineView("two", function(stg, viewUi) {
         return {
           initialize: function() {
@@ -143,19 +148,10 @@
             document.getElementById("btn3").addEventListener(ACTION, function() {
               stg.pushView('three', {transition: 'fancy'});
             }, false);
-            
-            /*
-             * Simulate delay in beforetransitionin (Should not affect transition smoothness)
-            viewUi.addEventListener("beforetransitionin", function(e) {
-              for(var i = 0; i < 10000; i += 1) {
-                console.log("I is " + i);
-              }
-              console.log("Done before transition in");
-            }, false);
-            */
           }
         };
       });
+
       Stage.defineView("three", function(stg, viewUi) {
         return {
           initialize: function() {
@@ -165,12 +161,19 @@
             document.getElementById("btn5").addEventListener(ACTION, function() {
               stg.pushView('four', {transition: "lollipop"});
             }, false);
+          },
+          activate: function(options, done) {
+            actionbar.innerHTML = "Loading...";
+            // Simulate delay (Should not affect transition smoothness)
+            setTimeout(function() {
+              // Tell the stage that we are done
+              done();
+            }, 200);
           }
         };
       });
       
-      var viewPort = document.getElementById("viewPort"),
-          actionbar = document.getElementById("actionbar");
+
       viewPort.addEventListener("viewtransitionin", function(e) {
         actionbar.innerHTML = "VIEW " + e.viewId.toUpperCase();
       }, false);
@@ -189,7 +192,7 @@
       });
       
       setTimeout(function() {
-        stage.pushView("one", {transition: "slide"});
+        stage.pushView("one", {transition: "fade"});
       }, 500);      
     </script>
   </body>
