@@ -1,10 +1,3 @@
-.rotate(@x: 0, @y: 0, @z: 0, @angle: 0deg) {
-  -moz-transform: rotate3d(@x, @y, @z, @angle);
-  -webkit-transform: rotate3d(@x, @y, @z, @angle);
-  -o-transform: rotate3d(@x, @y, @z, @angle);
-  -ms-transform: rotate3d(@x, @y, @z, @angle);
-  transform: rotate3d(@x, @y, @z, @angle);
-}
 
 .scale(@x: 1, @y: 1, @z: 1) {
   -moz-transform: scale3d(@x, @y, @z);
@@ -24,10 +17,9 @@
 
 .scaleAndTranslate(@tx: 0, @ty: 0, @tz: 0, @sx: 1, @sy: 1) {
   -moz-transform: translate(@tx, @ty) scale(@sx, @sy);
-  /**
-   * In older webkits on android, this causes the whole page to jump up and down
-   * when typing, in input fields
-   */
+  
+  // In older webkits on android, this causes the whole page to jump up and down
+  // when typing, in input fields
   -webkit-transform: translate3d(@tx, @ty, @tz) scale(@sx, @sy);
   // -webkit-transform: translate(@x, @y) scale(@sx, @sy);
   -o-transform: translate(@tx, @ty) scale(@sx, @sy);
@@ -51,15 +43,11 @@
   transition: transform @time @anim @delay;
 }
 
-.transition-prop(@prop, @time: 200ms, @anim: ease, @delay: 0ms) {
-  -moz-transition: @prop @time @anim @delay;
-  -webkit-transition: @prop @time @anim @delay;
-  -o-transition: @prop @time @anim @delay;
-  -ms-transition: @prop @time @anim @delay;
-  transition: @prop @time @anim @delay;
-}
 
 
+
+
+/* ------------------------------ Default view and viewport styles ------------------------------ */
 .stage-viewport {
   width: 100%;
   height: 100%;
@@ -68,13 +56,6 @@
   padding: 0;
   overflow: hidden;
   box-sizing: border-box;
-  
-  /*
-  &.view-transitioning {
-    height: 1000%;
-    overflow: hidden;
-  }
-  */
 }
 
 .stage-view {
@@ -102,18 +83,20 @@
   }
 }
 
-/* ---------------------------- Slide transition for views ---------------------------- */
+
+
+
+
+/* ------------------------ Various outofthebox transitions for views  -------------------------- */
 .slide {
   .stage-view {
     .translate(100%);
-    // .transition-transform(600ms, cubic-bezier(0.19, 1, 0.22, 1));
-    .transition-transform(400ms, cubic-bezier(0.4, 0.0, 0.2, 1));
+    .transition-transform(450ms, cubic-bezier(0.4, 0.0, 0.2, 1));
     
     &.pop {
       .translate(100%);
     }
 
-    /* For view transitions */
     &.in {
       .transformNone;
     }
@@ -121,13 +104,11 @@
     &.stack {
       z-index: 98;
       .translate(-60%);
-      // .transition-transform(750ms, cubic-bezier(0.19, 1, 0.22, 1));
-      .transition-transform(500ms, cubic-bezier(0.4, 0.0, 0.2, 1));
+      .transition-transform(650ms, cubic-bezier(0.4, 0.0, 0.2, 1));
     }
   }
-}  
-  
-/* ---------------------------- Slide transition for views ---------------------------- */
+}
+
 .fade {
   .stage-view {
     opacity: 0;
@@ -154,7 +135,6 @@
 .fancy {
   .stage-view {
     .scaleAndTranslate(100%);
-    // .transition-transform(600ms, cubic-bezier(0.19, 1, 0.22, 1));
     .transition-transform(400ms, cubic-bezier(0.4, 0.0, 0.2, 1));
 
     &.pop {
@@ -166,8 +146,7 @@
     &.stack {
       z-index: 98;
       .scaleAndTranslate(-70%, 0, 0, 0.8, 0.8);
-      // .transition-transform(750ms, cubic-bezier(0.19, 1, 0.22, 1));
-      .transition-transform(500ms, cubic-bezier(0.4, 0.0, 0.2, 1));
+      .transition-transform(550ms, cubic-bezier(0.4, 0.0, 0.2, 1));
     }
   }
 }
@@ -176,6 +155,7 @@
   .stage-view {
     opacity: 0;
     .translate(0, 80px);
+
     -moz-transition: -moz-transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
     -webkit-transition: -webkit-transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
     -o-transition: -o-transform 400ms cubic-bezier(0.19, 1, 0.22, 1), opacity 250ms ease;
@@ -197,7 +177,6 @@
       // for accurate lollipop emulation, disable below
       .translate(0, -50px);
       
-      // opacity: 1;
       // for accurate lollipop emulation, enable below
       opacity: 0.8;
     }

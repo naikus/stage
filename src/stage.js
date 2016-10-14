@@ -386,7 +386,7 @@
         },
         NO_TRANSITION = "no-transition";
 
-    console.log(Env);
+    // console.log(Env);
 
     /**
      * Makes an XmlHttpRequest request
@@ -563,7 +563,7 @@
       this.id = id;
       this.element = elem;
       this.controller = controller;
-      DOM.data(this.element, "viewId", id);
+      // DOM.data(this.element, "viewId", id);
     }
     View.prototype = {
       constructor: View,
@@ -954,7 +954,7 @@
 
       function handleViewTransitionEnd(e) {
         var viewElement = e.target,
-            viewId = DOM.data(viewElement, "viewId"),
+            viewId = viewElement.getAttribute("data-view"), // DOM.data(viewElement, "viewId"),
             view = views[viewId],
             tType,
             currTransition,
