@@ -955,10 +955,17 @@
       function handleViewTransitionEnd(e) {
         var viewElement = e.target,
             viewId = viewElement.getAttribute("data-view"), // DOM.data(viewElement, "viewId"),
-            view = views[viewId],
+            view,
             tType,
             currTransition,
             currView;
+
+        if(!viewId) {
+          // Not our transition end event (Bubbled from children)
+          return;
+        }
+
+        view = views[viewId];
 
         if(!transitionTracker.transitionEnded(view)) {
           // console.log("Transition pending for", view.id, e.propertyName);
