@@ -556,8 +556,8 @@
       }
       return def;
     }
-    
-    
+
+
 
     function View(id, elem, controller) {
       this.id = id;
@@ -620,20 +620,20 @@
         }
       }
     };
-    
-    
+
+
     function TransitionTracker() {
       var name,
           fromView,
           toView,
           progressing = false;
           eventCount = {};
-      
+
       function getTransitionPropertyCount(viewElem) {
         var style = DOM.getComputedStyle(viewElem), property = style["transition-property"];
         return property ? property.split(",").length : 0;
       }
-      
+
       return {
         name: function() {
           if(arguments.length) {
@@ -676,9 +676,9 @@
           fromView = toView = null;
         }
       };
-      
+
     }
-    
+
 
     /**
      * Creates a Stage instance
@@ -753,13 +753,11 @@
       function pushViewInternal(viewId, viewOptions) {
         var view = views[viewId],
             currentView,
-            transition = "transition" in viewOptions
-                ? viewOptions.transition
-                : defaultTransition,
+            transition = "transition" in viewOptions ? viewOptions.transition : defaultTransition,
             transitionUI = function() {
               if(currentView) dispatchBeforeViewTransitionEvent("out", currentView);
               dispatchBeforeViewTransitionEvent("in", view);
-              
+
               raf(function() {
                 if(currentView) {
                   stackViewUI(currentView, transition);
@@ -767,12 +765,12 @@
                 pushViewUI(view, transition);
               });
             };
-            
-            
+
+
         // Transitions are set on the view port
         // console.debug("pushView(): Using transition ", transition);
         var currTransition = transitionTracker.name();
-        
+
         if(currTransition !== transition) {
           transitionTracker.name(transition);
           if(currTransition) {DOM.removeClass(viewPort, currTransition);}
@@ -836,7 +834,7 @@
             transitionUI = function() {
               dispatchBeforeViewTransitionEvent("out", currentView);
               dispatchBeforeViewTransitionEvent("in", view);
-              
+
               raf(function() {
                 popViewUI(currentView, transition);
                 unstackViewUI(view, transition);
@@ -863,7 +861,7 @@
         // We are actually transitioning
         DOM.addClass(viewPort, "view-transitioning");
         view.show(true);
-        
+
         transitionTracker.from(currentView).to(view);
 
         currentView.controller.deactivate();
@@ -937,7 +935,7 @@
           element: view.element
         });
       }
-      
+
       function dispatchBeforeViewTransitionEvent(tType, view) {
         DOM.dispatchEvent("beforeviewtransition" + tType, {
           element: viewPort,
@@ -985,9 +983,9 @@
           view.show(false);
           tType = "out";
         }
-        
+
         dispatchViewTransitionEvents(tType, view);
-        
+
         if(!transitionTracker.inProgress()) {
           // console.log("Transition complete!");
           transitionTracker.clear();
@@ -1018,7 +1016,7 @@
             console.log("pushView() View transitioin in progress. Ignoring this call");
             return;
           }
-          
+
           transitionTracker.inProgress(true);
 
           if(!view) {
@@ -1055,7 +1053,7 @@
           if(viewStack.length < 2) {
             throw new Error("Can't pop. One or less view(s)");
           }
-          
+
           // Indicate that we are transitionin from current view
           transitionTracker.inProgress(true);
 
@@ -1086,6 +1084,19 @@
         },
         isTransitionInProgress: function() {
           return transitionTracker.inProgress();
+        },
+        loadView: function(viewId, callback) {
+          var viewDef = VIEW_DEFS[viewId];
+          if(!viewDef) {
+            throw new Error("Don't know of view: " + viewId);
+          }
+          if(!viewDef.factory) {
+            loadView(viewDef.templatePath, viewPort, function(viewData) {
+              callback({viewId: viewId, error: viewData.error});
+            });
+          }else {
+            callback({viewId: viewId, error: false});
+          }
         }
       };
 
@@ -1105,7 +1116,7 @@
      * value.
      * {
      *    "main": "views/main.html",
-     *    "about": "views/about.html" 
+     *    "about": "views/about.html"
      * }
      * @param {type} views
      * @returns {undefined}
@@ -1120,7 +1131,7 @@
         def.templatePath = views[viewId];
       }
     };
-    
+
     /**
      * Register a singel view with stage
      * @param {type} viewId The id of the view. e.g. "main"
