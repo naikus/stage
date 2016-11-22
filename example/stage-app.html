@@ -12,7 +12,7 @@
 
     <meta http-equiv="cleartype" content="on" />
 
-    <link rel="stylesheet" type="text/css" href="css/stage.css" />
+    <link rel="stylesheet" type="text/css" href="stage.css" />
     <style>
       body {
         font-family: sans-serif;
@@ -117,10 +117,10 @@
     </div>
     <div id="actionbar">WELCOME</div>
 
-    
-    
 
-    
+
+
+
     <script src="stage.js"> </script>
     <script>
       var ACTION = ("ontouchstart" in document.documentElement) ? "touchstart" : "click";
@@ -128,38 +128,38 @@
       var viewPort = document.getElementById("viewPort"),
           actionbar = document.getElementById("actionbar");
 
-      
-      Stage.defineView("one", function(stg, viewUi) {
+
+      Stage.defineView("one", function(stageContext, viewUi) {
         return {
           initialize: function() {
             document.getElementById("btn1").addEventListener(ACTION, function() {
-              stg.pushView('two', {transition: 'slide'});
+              stageContext.pushView('two', {transition: 'slide'});
             }, false);
           }
         };
       });
 
-      Stage.defineView("two", function(stg, viewUi) {
+      Stage.defineView("two", function(stageContext, viewUi) {
         return {
           initialize: function() {
             document.getElementById("btn2").addEventListener(ACTION, function() {
-              stg.popView();
+              stageContext.popView();
             }, false);
             document.getElementById("btn3").addEventListener(ACTION, function() {
-              stg.pushView('three', {transition: 'fancy'});
+              stageContext.pushView('three', {transition: 'fancy'});
             }, false);
           }
         };
       });
 
-      Stage.defineView("three", function(stg, viewUi) {
+      Stage.defineView("three", function(stageContext, viewUi) {
         return {
           initialize: function() {
             document.getElementById("btn4").addEventListener(ACTION, function() {
-              stg.popView();
+              stageContext.popView();
             }, false);
             document.getElementById("btn5").addEventListener(ACTION, function() {
-              stg.pushView('four', {transition: "lollipop"});
+              stageContext.pushView('four', {transition: "lollipop"});
             }, false);
           },
           activate: function(options, done) {
@@ -172,7 +172,7 @@
           }
         };
       });
-      
+
 
       viewPort.addEventListener("viewtransitionin", function(e) {
         actionbar.innerHTML = "VIEW " + e.viewId.toUpperCase();
@@ -180,20 +180,20 @@
       viewPort.addEventListener("beforeviewtransitionin", function() {
         actionbar.innerHTML = "";
       }, false);
-      
+
       var stage = Stage({
         // viewport: "#viewPort",
         viewport: viewPort
       });
-      
+
       // Define a fourth external view
       Stage.views({
         "four": "view-four.html"
       });
-      
+
       setTimeout(function() {
         stage.pushView("one", {transition: "fade"});
-      }, 500);      
+      }, 500);
     </script>
   </body>
 </html>

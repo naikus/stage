@@ -44,13 +44,13 @@ gulp.task("jshint", function() {
 gulp.task("lessc", function() {
   return gulp.src(config.src_dir + "/**/*.less")
       .pipe(less())
-      .pipe(gulp.dest(config.dist.css_dir));
+      .pipe(gulp.dest(config.dist.dir));
 });
 
 
-gulp.task("build", [], function() {
+gulp.task("build-lib", [], function() {
    // do other build things
-   // gulp.start("jshint");
+   gulp.start("jshint");
    gulp.start("lessc");
 
    return eventStream.merge(
@@ -61,19 +61,21 @@ gulp.task("build", [], function() {
             .pipe(gulp.dest(config.dist.dir))
             .pipe(uglify({comments: /^\/\*\!*/}))
             .pipe(gulp.dest(config.dist.dir)),
-         
+
       gulp.src(["src/stage.less"])
             .pipe(concat("stage.less"))
             .pipe(gulp.dest(config.dist.dir))
    );
+});
 
+gulp.task("build", ["build-lib"], function() {
+  gulp.src(config.dist.dir + "/**/*.*").pipe(gulp.dest("example"));
 });
 
 
 gulp.task("example", ["build"], function() {
-  gulp.src("example/**/*.*").pipe(gulp.dest(config.dist.dir));
   connect.server({
-    root: "dist",
+    root: "example",
     post: 8080
   });
 });

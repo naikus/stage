@@ -1,1 +1,1 @@
-module.exports = require("./src/stage");
+module.exports = require("./dist/stage");

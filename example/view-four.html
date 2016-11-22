@@ -4,16 +4,15 @@
   <script src="four.js"></script>
   <script>
     // var Stage = require("stage");
-    Stage.defineView("four", function(stg, viewUi) {
+    Stage.defineView("four", function(stageContext, viewUi) {
       dummy(); // from four.js
       return {
         initialize: function() {
           document.getElementById("btn6").addEventListener(ACTION, function() {
-            stg.popView();
+            stageContext.popView();
           }, false);
         },
-        activate: function(opts) {
-          /*
+        activate: function(opts, done) {
           var counter = 5, timerId, counterElem = document.getElementById("actionbar");
           timerId = setInterval(function() {
             if(!counter) {
@@ -22,7 +21,6 @@
             }
             counterElem.innerHTML = (counter--);
           }, 500);
-          */
         }
       };
     });
