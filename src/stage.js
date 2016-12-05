@@ -644,6 +644,23 @@
         var style = DOM.getComputedStyle(viewElem), property = style["transition-property"];
         return property ? property.split(",").length : 0;
       }
+      /*
+      function getTransitionPropertyCount(viewElem) {
+        // console.log(TransitionTracker.PropertyCount);
+        var viewId = viewElem.getAttribute("data-view"),
+            key = name + "_" + viewId,
+            count = TransitionTracker.PropertyCount[key],
+            property,
+            style;
+
+        if(typeof count === "undefined") {
+          style = DOM.getComputedStyle(viewElem);
+          property = style["transition-property"];
+          count = TransitionTracker.PropertyCount[key] = property ? property.split(",").length : 0; 
+        }
+        return count;
+      }
+      */
 
       return {
         name: function() {
@@ -689,6 +706,7 @@
       };
 
     }
+    // TransitionTracker.PropertyCount = {};
 
     /**
      * A limited feature stage context to be used in views
