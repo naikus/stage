@@ -168,3 +168,42 @@
   transform: translate3d(0, -50px, 0);
   opacity: 0.8;
 }
+.slide-up .stage-view {
+  -moz-transform: translate(0, 100%) scale(1, 1);
+  -webkit-transform: translate3d(0, 100%, 0) scale(1, 1);
+  -o-transform: translate(0, 100%) scale(1, 1);
+  -ms-transform: translate3d(0, 100%, 0) scale(1, 1);
+  transform: translate3d(0, 100%, 0) scale(1, 1);
+  -moz-transition: -moz-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -webkit-transition: -webkit-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -o-transition: -o-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -ms-transition: -ms-transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+.slide-up .stage-view.pop {
+  -moz-transform: translate3d(0, 100%, 0);
+  -webkit-transform: translate3d(0, 100%, 0);
+  -o-transform: translate3d(0, 100%, 0);
+  -ms-transform: translate3d(0, 100%, 0);
+  transform: translate3d(0, 100%, 0);
+}
+.slide-up .stage-view.in {
+  -moz-transform: none;
+  -webkit-transform: none;
+  -o-transform: none;
+  -ms-transform: none;
+  transform: none;
+}
+.slide-up .stage-view.stack {
+  z-index: 98;
+  -moz-transform: translate(0, -1px) scale(0.95, 0.95);
+  -webkit-transform: translate3d(0, -1px, 0) scale(0.95, 0.95);
+  -o-transform: translate(0, -1px) scale(0.95, 0.95);
+  -ms-transform: translate3d(0, -1px, 0) scale(0.95, 0.95);
+  transform: translate3d(0, -1px, 0) scale(0.95, 0.95);
+  -moz-transition: -moz-transform 550ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -webkit-transition: -webkit-transform 550ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -o-transition: -o-transform 550ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  -ms-transition: -ms-transform 550ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  transition: transform 550ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
