@@ -641,7 +641,11 @@
           eventCount = {};
 
       function getTransitionPropertyCount(viewElem) {
-        var style = DOM.getComputedStyle(viewElem), property = style["transition-property"];
+        var style = DOM.getComputedStyle(viewElem), 
+            property = style["transition-property"] || 
+                style["-webkit-transition-property"] || 
+                style["-moz-transitionProperty"];
+        // console.log(property);
         return property ? property.split(",").length : 0;
       }
       /*
