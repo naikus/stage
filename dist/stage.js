@@ -788,8 +788,8 @@
           throw new Error("UI for view " + viewId + " not found.");
         }
 
-        viewUi.addEventListener(Env.transition.end || "transitionend", handleViewTransitionEnd);
-        viewUi.addEventListener(Env.animation.end || "animationend", handleViewTransitionEnd);
+        viewUi.addEventListener(Env.transition.end || "transitionend", handleViewTransitionEnd, false);
+        viewUi.addEventListener(Env.animation.end || "animationend", handleViewTransitionEnd, false);
 
         // console.debug("Creating view factory for ", viewId);
         // viewController = viewDef.factory(instance, viewUi);
