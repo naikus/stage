@@ -25,18 +25,13 @@
   /* ------------------------------------- Utility Functions ------------------------------------ */
   var Util = (function() {
     // Some utility functions
-    /* @Deadcode
-    function create(from) {
-      function T() {}
-      T.prototype = from;
-      return new T();
-    }
-    */
 
     var noop = function() {},
-        /* @Deadcode
-        createObject = (Object.create || create),
-        */
+        createObject = (Object.create || function create(from) {
+          function T() {}
+          T.prototype = from;
+          return new T();
+        }),
         AProto = Array.prototype,
         OProto = Object.prototype,
         slice = AProto.slice,
@@ -46,28 +41,29 @@
     return {
       /* @Deadcode
       create: createObject,
-      extend: function(From, extraProps) {
+      */
+      extend: function(From, implementation) {
         // we provide for initialization after constructor call
-        var initialize = extraProps._initialize || noop;
+        var initialize = implementation._constructor || noop;
         // once initialized, we don't really need it in the actual object
-        delete extraProps._initialize;
+        delete implementation._constructor;
 
         function F() {
-          From.apply && From.apply(this, arguments);
+          (From.apply && From.apply(this, arguments));  // jshint ignore:line
           // call subclass initialization
           initialize.apply(this, arguments);
         }
 
         var Proto = F.prototype = createObject(From.prototype);
-        for(var k in extraProps) {
-          if(extraProps.hasOwnProperty(k)) {
-            Proto[k] = extraProps[k];
+        for(var k in implementation) {
+          if(implementation.hasOwnProperty(k)) {
+            Proto[k] = implementation[k];
           }
         }
         Proto.constructor = F;
         return F;
       },
-      */
+
       shallowCopy: function(/*target, source0, souce1, souce2, ... */) {
         var target = arguments[0], sources = Array.prototype.slice.call(arguments, 1), src;
         for(var i = 0, len = sources.length; i < len; i++) {
@@ -95,13 +91,13 @@
        * @param {Object} that The object/function/any of which the type is to be determined
        */
       /* @Deadcode
-      getTypeOf: function(that) {
-        // why 8? cause the result is always of pattern '[object <type>]'
-        return objToString.call(that).slice(8, -1);
-      },
-      isTypeOf: function(that, type) {
-        return objToString.call(that).slice(8, -1) === type;
-      },
+        getTypeOf: function(that) {
+          // why 8? cause the result is always of pattern '[object <type>]'
+          return objToString.call(that).slice(8, -1);
+        },
+        isTypeOf: function(that, type) {
+          return objToString.call(that).slice(8, -1) === type;
+        },
       */
 
       /**
@@ -390,7 +386,7 @@
           };
         })(),
         STAGE_DEFAULT_OPTIONS = {
-          transitionDelay: 150,
+          transitionDelay: 100,
           transition: "slide"
         },
         NO_TRANSITION = "no-transition";
@@ -569,7 +565,12 @@
     }
 
 
-
+    /**
+     * The View UI object
+     * @param {String} id The id of the view
+     * @param {Element} elem The view DOM element
+     * @param {ViewController} controller view controller for the view
+     */
     function View(id, elem, controller) {
       this.id = id;
       this.element = elem;
@@ -633,6 +634,16 @@
     };
 
 
+    function ViewController() {}
+    ViewController.prototype = {
+      constructor: ViewController,
+      initialize: function() {},
+      activate: function() {},
+      deactivate: function() {},
+      destroy: function() {}
+    };
+
+
     function TransitionTracker() {
       var name,
           fromView,
@@ -641,9 +652,9 @@
           eventCount = {};
 
       function getTransitionPropertyCount(viewElem) {
-        var style = DOM.getComputedStyle(viewElem), 
-            property = style["transition-property"] || 
-                style["-webkit-transition-property"] || 
+        var style = DOM.getComputedStyle(viewElem),
+            property = style["transition-property"] ||
+                style["-webkit-transition-property"] ||
                 style["-moz-transitionProperty"];
         // console.log(property);
         return property ? property.split(",").length : 0;
@@ -660,7 +671,7 @@
         if(typeof count === "undefined") {
           style = DOM.getComputedStyle(viewElem);
           property = style["transition-property"];
-          count = TransitionTracker.PropertyCount[key] = property ? property.split(",").length : 0; 
+          count = TransitionTracker.PropertyCount[key] = property ? property.split(",").length : 0;
         }
         return count;
       }
@@ -781,6 +792,7 @@
         var selector = '[data-view="' + viewId + '"]',
             viewUi = DOM.selectOne(selector, viewPort),
             viewDef = VIEW_DEFS[viewId],
+            VController,
             viewController,
             view;
 
@@ -793,13 +805,17 @@
 
         // console.debug("Creating view factory for ", viewId);
         // viewController = viewDef.factory(instance, viewUi);
+        /*
         viewController = viewDef.factory(context, viewUi);
         CONTROLLER_METHODS.forEach(function(m) {
           if(typeof viewController[m] === "undefined") {
             viewController[m] = noop;
           }
         });
+        */
 
+        VController = Util.extend(ViewController, viewDef.factory(context, viewUi));
+        viewController = new VController();
         view = views[viewId] = new View(viewId, viewUi, viewController);
         return view;
       }
@@ -984,14 +1000,14 @@
         }
       }
 
-      /*
-      function dispatchViewLoad(type, viewId) {
-        DOM.dispatchEvent("viewload" + type, {
-          element: viewPort,
-          data: {viewId: viewId}
-        });
+      function dispatchViewLoad(type, viewId, error) {
+        // setTimeout(function() {
+          DOM.dispatchEvent("viewload" + type, {
+            element: viewPort,
+            data: {viewId: viewId, error: error}
+          });
+        // }, 1);
       }
-      */
 
       function dispatchViewTransitionEvents(type, view) {
         DOM.dispatchEvent("viewtransition" + type, {
@@ -1176,10 +1192,10 @@
             throw new Error("Don't know of view: " + viewId);
           }
           if(!viewDef.factory) {
-            // dispatchViewLoad("start", viewId);
+            dispatchViewLoad("start", viewId);
             loadView(viewDef.templatePath, viewPort, function(viewData) {
-              // dispatchViewLoad("end", viewId);
               callback({viewId: viewId, error: viewData.error});
+              dispatchViewLoad("end", viewId, viewData.error);
             });
           }else {
             callback({viewId: viewId, error: false});
