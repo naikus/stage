@@ -11,19 +11,26 @@
     }
   </style>
   <div class="content">
-    <!-- 
+    <!--
     <img class="coming-soon" src="images/under-construction_0.svg" alt="Coming soon..." />
     <p class="coming-soon-msg">
       I'm still working on this page. Please check back later...
     </p>
     -->
-    <section>
-      <h3>Tutorial: Build a sample 2 view app</h3>
+    <h3>Tutorial: Build a sample 2 view app</h3>
 
+    <section>
+      <h4>Download and install</h4>
       <p>
-        Download the stage.js distribution. Now let's start with the directory structure. 
-        Create a following structure:
+        Download the stage.js distribution. You can either include a script file or use package.json.
       </p>
+
+      <pre>
+        <code class="language-shell">
+# If you use npm use the following command for now
+npm install github:naikus/stagejs --save
+        </code>
+      </pre>
       <pre>
         <code class="language-html">
 &lt;!-- Directory structure --&gt;
@@ -33,11 +40,149 @@ myapp
   + js
   |  + stage.js
   + views
-  |   + home.html
-  |   + about.html
   + index.html
         </code>
       </pre>
+    </section>
+
+
+
+    <section>
+      <h4>Create index.html</h4>
+      <p>
+        Create a file index.html inside myapp directory. Include stage.js and stage.css.
+      </p>
+      <pre>
+      <code class="language-html">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8" /&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /&gt;
+    &lt;meta name="HandheldFriendly" content="True" /&gt;
+    &lt;meta name="MobileOptimized" content="480" /&gt;
+    &lt;meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" /&gt;
+    &lt;meta name="apple-mobile-web-app-capable" content="yes" /&gt;
+
+    &lt;meta http-equiv="cleartype" content="on" /&gt;
+
+    &lt;link rel="stylesheet" type="text/css" href="css/stage.css" /&gt;
+    &lt;style&gt;
+      body {
+        font-family: sans-serif;
+        font-size: 1em;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+
+  &lt;!-- Don't keep body as the view-port on android devices cause the views don't scroll --&gt;
+  &lt;body&gt;
+    &lt;!-- All our views will be shown here --&gt;
+    &lt;div class="stage-viewport" id="viewPort"&gt;&lt;/div&gt;
+    &lt;script src="stage.js"&gt; &lt;/script&gt;
+    &lt;script&gt;
+      var viewPort = document.getElementById("viewPort");
+
+      // Define your views
+      Stage.views({
+        "home": "views/home.html",
+        "about": "views/about.html"
+      });
+
+      var stage = Stage({ // Or if you are using require , require("stage")
+        // viewport: "#viewPort",
+        viewport: viewPort
+      });
+
+      setTimeout(function() {
+        stage.pushView("home");
+      }, 100);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+      </code>
+      </pre>
+    </section>
+
+
+
+    <section>
+      <h4>Create home view partial</h4>
+      <p>
+        Create a file home.html in the views directory.
+      </p>
+      <pre>
+        <code class="language-html">
+&lt;!-- views/home.html (partial) --&gt;
+&lt;div class="stage-view home" data-view="home"&gt;
+  &lt;h1&gt;Home&lt;/h1&gt;
+  &lt;button class="my-button"&gt;Show About View&lt;/button&gt;
+  &lt;!-- Any external script you want to include --&gt;
+  &lt;script src="four.js"&gt;&lt;/script&gt;
+
+  &lt;!-- You can also put the code below in a js file and add a script tag here --&gt;
+  &lt;script&gt;
+    Stage.defineView("home", function factory(stageContext, viewElement) {
+      return {
+        initialize: function(options) {
+          viewElement.getElementsByClassName("my-button")[0]
+              .addEventListener("click", function() {
+            var f = four(); // from four.js
+            stageContext.showView("about", {f: f});
+          }, false);
+        },
+        activate: function(opts) {},
+        deactivate: function(opts) {}
+      };
+    });
+  &lt;/script&gt;
+&lt;/div&gt;
+        </code>
+      </pre>
+    </section>
+
+
+
+    <section>
+      <h4>Create about view partial</h4>
+      <p>
+        Create a file about.html in the views directory.
+      </p>
+      <pre>
+        <code class="language-html">
+&lt;!-- views/about.html (partial) --&gt;
+&lt;div class="stage-view about" data-view="about"&gt;
+  &lt;h1&gt;About&lt;/h1&gt;
+  &lt;button class="my-button"&gt;Go Back&lt;/button&gt;
+
+  &lt;!-- You can also put the code below in a js file and add a script tag here --&gt;
+  &lt;script&gt;
+    Stage.defineView("about", function factory(stageContext, viewElement) {
+      return {
+        initialize: function(options) {
+          viewElement.getElementsByClassName("my-button")[0]
+              .addEventListener("click", function() {
+            stageContext.popView();
+          }, false);
+        }
+      };
+    });
+  &lt;/script&gt;
+&lt;/div&gt;
+        </code>
+      </pre>
+    </section>
+
+    <section>
+      <p>
+        That's it! Start a server and load index.html from your browser. To use stage with commonjs
+        check out the
+        <a href="https://github.com/naikus/stage-starter">Stage Statrter App</a> or with
+        <a href="https://vuejs.org/">Vue.js</a> see
+        <a href="https://github.com/naikus/stage-starter-vue">Stage Starter Vue App</a>
+      </p>
+
     </section>
   </div>
   <script src="views/getting-started.js"></script>

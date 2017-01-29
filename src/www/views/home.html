@@ -9,7 +9,7 @@
       <h3>Introduction</h3>
       <p>
         Stage.js is a compact, standalone library that can be used to develop simple, single page
-        mobile and web apps. Stage.js is very focused and provides a view(page) management 
+        mobile and web apps. Stage.js is very focused and provides a view(page) management
         layer for SPAs. It provides view (page) lifecycle and transitions.
       </p>
       <p>
@@ -34,12 +34,12 @@
 
   &lt;!-- You can also put the code below in a js file and add a script tag here --&gt;
   &lt;script&gt;
-    Stage.defineView("myview", function(stageInstance, viewElement) {
+    Stage.defineView("myview", function(stageContext, viewElement) {
       return {
         initialize: function() {
           document.getElementById("myBtn").addEventListener("click", function() {
             var f = four(); // from four.js
-            stageInstance.showView("about", {f: f});
+            stageContext.showView("about", {f: f});
           }, false);
         },
         activate: function(opts) {},
@@ -78,19 +78,19 @@
             // viewport: "#viewPort",
             viewport: viewPort
           });
-      
+
       // Stage views are registered on the 'Stage' function
       Stage.views({
         "myview": "views/myview.html",
         "about": "views/about.html"
       });
 
-      // You can also register single views 
+      // You can also register single views
       Stage.view("myView", "views/myview.html");
 
       setTimeout(function() {
         appStage.pushView("myview" /*, {transition: "slide"}*/);
-      }, 500);      
+      }, 500);
     &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
@@ -101,18 +101,18 @@
       That's it!
       Head over to the <a href="#/getting-started">Tutorial</a> for an in-depth tutorial
     </p>
-    
+
   </div>
   <div class="footer alt-bg">
     <span class="text-x-small">Made using stage.js</span>
   </div>
   <script>
     (function() {
-      var Stage = require("stage"), 
+      var Stage = require("stage"),
           Prism = require("prismjs");
 
-      Stage.defineView("home", function(AppStage, viewUi) {
-        
+      Stage.defineView("home", function(stageContext, viewUi) {
+
         function highlightCodeBlocks() {
           var blocks = viewUi.getElementsByTagName("code");
           Array.prototype.forEach.call(blocks, function(elem) {

@@ -555,6 +555,9 @@ var _ = _self.Prism = {
 		_.hooks.run('before-sanity-check', env);
 
 		if (!env.code || !env.grammar) {
+			if (env.code) {
+				env.element.textContent = env.code;
+			}
 			_.hooks.run('complete', env);
 			return;
 		}
@@ -632,9 +635,16 @@ var _ = _self.Prism = {
 					lookbehindLength = 0,
 					alias = pattern.alias;
 
+				if (greedy && !pattern.pattern.global) {
+					// Without the global flag, lastIndex won't work
+					var flags = pattern.pattern.toString().match(/[imuy]*$/)[0];
+					pattern.pattern = RegExp(pattern.pattern.source, flags + "g");
+				}
+
 				pattern = pattern.pattern || pattern;
 
-				for (var i=0; i<strarr.length; i++) { // Don’t cache length as it changes during the loop
+				// Don’t cache length as it changes during the loop
+				for (var i=0, pos = 0; i<strarr.length; pos += strarr[i].length, ++i) {
 
 					var str = strarr[i];
 
@@ -654,40 +664,38 @@ var _ = _self.Prism = {
 
 					// Greedy patterns can override/remove up to two previously matched tokens
 					if (!match && greedy && i != strarr.length - 1) {
-						// Reconstruct the original text using the next two tokens
-						var nextToken = strarr[i + 1].matchedStr || strarr[i + 1],
-						    combStr = str + nextToken;
-
-						if (i < strarr.length - 2) {
-							combStr += strarr[i + 2].matchedStr || strarr[i + 2];
-						}
-
-						// Try the pattern again on the reconstructed text
-						pattern.lastIndex = 0;
-						match = pattern.exec(combStr);
+						pattern.lastIndex = pos;
+						match = pattern.exec(text);
 						if (!match) {
-							continue;
+							break;
 						}
 
-						var from = match.index + (lookbehind ? match[1].length : 0);
-						// To be a valid candidate, the new match has to start inside of str
-						if (from >= str.length) {
+						var from = match.index + (lookbehind ? match[1].length : 0),
+						    to = match.index + match[0].length,
+						    k = i,
+						    p = pos;
+
+						for (var len = strarr.length; k < len && p < to; ++k) {
+							p += strarr[k].length;
+							// Move the index i to the element in strarr that is closest to from
+							if (from >= p) {
+								++i;
+								pos = p;
+							}
+						}
+
+						/*
+						 * If strarr[i] is a Token, then the match starts inside another Token, which is invalid
+						 * If strarr[k - 1] is greedy we are in conflict with another greedy pattern
+						 */
+						if (strarr[i] instanceof Token || strarr[k - 1].greedy) {
 							continue;
 						}
-						var to = match.index + match[0].length,
-						    len = str.length + nextToken.length;
 
 						// Number of tokens to delete and replace with the new match
-						delNum = 3;
-
-						if (to <= len) {
-							if (strarr[i + 1].greedy) {
-								continue;
-							}
-							delNum = 2;
-							combStr = combStr.slice(0, len);
-						}
-						str = combStr;
+						delNum = k - i;
+						str = text.slice(pos, p);
+						match.index -= pos;
 					}
 
 					if (!match) {
@@ -756,7 +764,7 @@ var Token = _.Token = function(type, content, alias, matchedStr, greedy) {
 	this.content = content;
 	this.alias = alias;
 	// Copy of the full string this token was created from
-	this.matchedStr = matchedStr || null;
+	this.length = (matchedStr || "").length|0;
 	this.greedy = !!greedy;
 };
 
@@ -792,13 +800,11 @@ Token.stringify = function(o, language, parent) {
 
 	_.hooks.run('wrap', env);
 
-	var attributes = '';
+	var attributes = Object.keys(env.attributes).map(function(name) {
+		return name + '="' + (env.attributes[name] || '').replace(/"/g, '&quot;') + '"';
+	}).join(' ');
 
-	for (var name in env.attributes) {
-		attributes += (attributes ? ' ' : '') + name + '="' + (env.attributes[name] || '') + '"';
-	}
-
-	return '<' + env.tag + ' class="' + env.classes.join(' ') + '" ' + attributes + '>' + env.content + '</' + env.tag + '>';
+	return '<' + env.tag + ' class="' + env.classes.join(' ') + '"' + (attributes ? ' ' + attributes : '') + '>' + env.content + '</' + env.tag + '>';
 
 };
 
@@ -831,7 +837,11 @@ if (script) {
 
 	if (document.addEventListener && !script.hasAttribute('data-manual')) {
 		if(document.readyState !== "loading") {
-			requestAnimationFrame(_.highlightAll, 0);
+			if (window.requestAnimationFrame) {
+				window.requestAnimationFrame(_.highlightAll);
+			} else {
+				window.setTimeout(_.highlightAll, 16);
+			}
 		}
 		else {
 			document.addEventListener('DOMContentLoaded', _.highlightAll);
@@ -860,10 +870,10 @@ if (typeof global !== 'undefined') {
 Prism.languages.markup = {
 	'comment': /<!--[\w\W]*?-->/,
 	'prolog': /<\?[\w\W]+?\?>/,
-	'doctype': /<!DOCTYPE[\w\W]+?>/,
+	'doctype': /<!DOCTYPE[\w\W]+?>/i,
 	'cdata': /<!\[CDATA\[[\w\W]*?]]>/i,
 	'tag': {
-		pattern: /<\/?(?!\d)[^\s>\/=.$<]+(?:\s+[^\s>\/=]+(?:=(?:("|')(?:\\\1|\\?(?!\1)[\w\W])*\1|[^\s'">=]+))?)*\s*\/?>/i,
+		pattern: /<\/?(?!\d)[^\s>\/=$<]+(?:\s+[^\s>\/=]+(?:=(?:("|')(?:\\\1|\\?(?!\1)[\w\W])*\1|[^\s'">=]+))?)*\s*\/?>/i,
 		inside: {
 			'tag': {
 				pattern: /^<\/?[^\s>\/]+/i,
@@ -920,7 +930,10 @@ Prism.languages.css = {
 	},
 	'url': /url\((?:(["'])(\\(?:\r\n|[\w\W])|(?!\1)[^\\\r\n])*\1|.*?)\)/i,
 	'selector': /[^\{\}\s][^\{\};]*?(?=\s*\{)/,
-	'string': /("|')(\\(?:\r\n|[\w\W])|(?!\1)[^\\\r\n])*\1/,
+	'string': {
+		pattern: /("|')(\\(?:\r\n|[\w\W])|(?!\1)[^\\\r\n])*\1/,
+		greedy: true
+	},
 	'property': /(\b|\B)[\w-]+(?=\s*:)/i,
 	'important': /\B!important\b/i,
 	'function': /[-a-z0-9]+(?=\()/i,
@@ -1001,7 +1014,8 @@ Prism.languages.javascript = Prism.languages.extend('clike', {
 	'keyword': /\b(as|async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|from|function|get|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|set|static|super|switch|this|throw|try|typeof|var|void|while|with|yield)\b/,
 	'number': /\b-?(0x[\dA-Fa-f]+|0b[01]+|0o[0-7]+|\d*\.?\d+([Ee][+-]?\d+)?|NaN|Infinity)\b/,
 	// Allow for all non-ASCII characters (See http://stackoverflow.com/a/2008444)
-	'function': /[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*(?=\()/i
+	'function': /[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*(?=\()/i,
+	'operator': /--?|\+\+?|!=?=?|<=?|>=?|==?=?|&&?|\|\|?|\?|\*\*?|\/|~|\^|%|\.{3}/
 });
 
 Prism.languages.insertBefore('javascript', 'keyword', {
@@ -1146,7 +1160,7 @@ function match (routes, uri, startAt) {
 
     if (captures = uri.match(re)) {
       for (var j = 1, len = captures.length; j < len; ++j) {
-        var value = typeof captures[j] === 'string' ? unescape(captures[j]) : captures[j];
+        var value = typeof captures[j] === 'string' ? decodeURIComponent(captures[j]) : captures[j];
         var key = keys[j - 1];
         if (key) {
           params[key] = value;
@@ -1251,18 +1265,13 @@ module.exports = Router;
   /* ------------------------------------- Utility Functions ------------------------------------ */
   var Util = (function() {
     // Some utility functions
-    /* @Deadcode
-    function create(from) {
-      function T() {}
-      T.prototype = from;
-      return new T();
-    }
-    */
 
     var noop = function() {},
-        /* @Deadcode
-        createObject = (Object.create || create),
-        */
+        createObject = (Object.create || function create(from) {
+          function T() {}
+          T.prototype = from;
+          return new T();
+        }),
         AProto = Array.prototype,
         OProto = Object.prototype,
         slice = AProto.slice,
@@ -1272,28 +1281,29 @@ module.exports = Router;
     return {
       /* @Deadcode
       create: createObject,
-      extend: function(From, extraProps) {
+      */
+      extend: function(From, implementation) {
         // we provide for initialization after constructor call
-        var initialize = extraProps._initialize || noop;
+        var initialize = implementation._constructor || noop;
         // once initialized, we don't really need it in the actual object
-        delete extraProps._initialize;
+        delete implementation._constructor;
 
         function F() {
-          From.apply && From.apply(this, arguments);
+          (From.apply && From.apply(this, arguments));  // jshint ignore:line
           // call subclass initialization
           initialize.apply(this, arguments);
         }
 
         var Proto = F.prototype = createObject(From.prototype);
-        for(var k in extraProps) {
-          if(extraProps.hasOwnProperty(k)) {
-            Proto[k] = extraProps[k];
+        for(var k in implementation) {
+          if(implementation.hasOwnProperty(k)) {
+            Proto[k] = implementation[k];
           }
         }
         Proto.constructor = F;
         return F;
       },
-      */
+
       shallowCopy: function(/*target, source0, souce1, souce2, ... */) {
         var target = arguments[0], sources = Array.prototype.slice.call(arguments, 1), src;
         for(var i = 0, len = sources.length; i < len; i++) {
@@ -1321,15 +1331,22 @@ module.exports = Router;
        * @param {Object} that The object/function/any of which the type is to be determined
        */
       /* @Deadcode
-      getTypeOf: function(that) {
-        // why 8? cause the result is always of pattern '[object <type>]'
-        return objToString.call(that).slice(8, -1);
-      },
-      isTypeOf: function(that, type) {
-        return objToString.call(that).slice(8, -1) === type;
-      },
+        getTypeOf: function(that) {
+          // why 8? cause the result is always of pattern '[object <type>]'
+          return objToString.call(that).slice(8, -1);
+        },
+        isTypeOf: function(that, type) {
+          return objToString.call(that).slice(8, -1) === type;
+        },
       */
-      hasOwnProperty: function(obj, prop) {
+
+      /**
+       * Whether the specified object has its own property
+       * @param {type} obj The target object
+       * @param {type} prop The property to check
+       * @returns {Boolean} true if the property belongs to the target object
+       */
+      ownsProperty: function(obj, prop) {
         if(obj.hasOwnProperty) {
           return obj.hasOwnProperty(prop);
         }else {
@@ -1492,7 +1509,7 @@ module.exports = Router;
         }
         // event.data = options.data;
         for(var k in data) {
-          if(Util.hasOwnProperty(data, k)) {
+          if(Util.ownsProperty(data, k)) {
             event[k] = data[k];
           }
         }
@@ -1580,7 +1597,8 @@ module.exports = Router;
             transition: (function() {
               var prefix, prop;
               for(var i = 0, len = prefixes.length; i < len; i += 1) {
-                prefix = prefixes[i], prop = prefix ? prefix + "Transition" : "transition";
+                prefix = prefixes[i];
+                prop = prefix ? prefix + "Transition" : "transition";
                 if(typeof style[prop] !== "undefined") {
                   return {
                     property: prop,
@@ -1593,7 +1611,8 @@ module.exports = Router;
             animation:(function() {
               var prefix, prop;
               for(var i = 0, len = prefixes.length; i < len; i += 1) {
-                prefix = prefixes[i], prop = prefix ? prefix + "Animation" : "animation";
+                prefix = prefixes[i];
+                prop = prefix ? prefix + "Animation" : "animation";
                 if(typeof style[prop] !== "undefined") {
                   return {
                     property: prop,
@@ -1607,12 +1626,12 @@ module.exports = Router;
           };
         })(),
         STAGE_DEFAULT_OPTIONS = {
-          transitionDelay: 150,
+          transitionDelay: 100,
           transition: "slide"
         },
         NO_TRANSITION = "no-transition";
 
-    console.log(Env);
+    // console.log(Env);
 
     /**
      * Makes an XmlHttpRequest request
@@ -1650,14 +1669,14 @@ module.exports = Router;
          if(state === 4) {
            code = xhr.status;
            if((code >= 200 && code < 400) || (code === 0 && wasConnected)) {
-             (success && success(xhr));
+             (success && success(xhr)); // jshint ignore:line
            }else {
-             (fail && fail(code, xhr));
+             (fail && fail(code, xhr)); // jshint ignore:line
            }
          }
       });
       xhr.addEventListener("timeout", function() {
-        (fail && fail("timeout", xhr));
+        (fail && fail("timeout", xhr)); // jshint ignore:line
       });
       // Send!
       xhr.send();
@@ -1667,11 +1686,13 @@ module.exports = Router;
      * Appends an inline script element to the specified element
      * @param {String} scriptContent The content of the script
      * @param {Element} toElement The HTML element
+     * @param {boolean} wrapInAnonFunc Whether to wrap script in an annonymous function (false)
      * @returns {undefined}
      */
-    function addInlineScript(scriptContent, toElement) {
+    function addInlineScript(scriptContent, toElement, wrapInAnonFunc) {
       var script = document.createElement("script");
-      script.textContent = scriptContent;
+      script.textContent = wrapInAnonFunc ? "(function() {\n" + scriptContent + "\n})();"
+          : scriptContent;
       toElement.appendChild(script);
     }
 
@@ -1756,7 +1777,7 @@ module.exports = Router;
         fail: function(error, xhr) {
           callback({
             path: path,
-            error: error,
+            error: error || true,
             xhr: xhr
           });
         }
@@ -1782,14 +1803,19 @@ module.exports = Router;
       }
       return def;
     }
-    
-    
 
+
+    /**
+     * The View UI object
+     * @param {String} id The id of the view
+     * @param {Element} elem The view DOM element
+     * @param {ViewController} controller view controller for the view
+     */
     function View(id, elem, controller) {
       this.id = id;
       this.element = elem;
       this.controller = controller;
-      DOM.data(this.element, "viewId", id);
+      // DOM.data(this.element, "viewId", id);
     }
     View.prototype = {
       constructor: View,
@@ -1846,20 +1872,51 @@ module.exports = Router;
         }
       }
     };
-    
-    
+
+
+    function ViewController() {}
+    ViewController.prototype = {
+      constructor: ViewController,
+      initialize: function() {},
+      activate: function() {},
+      deactivate: function() {},
+      destroy: function() {}
+    };
+
+
     function TransitionTracker() {
       var name,
           fromView,
           toView,
           progressing = false;
           eventCount = {};
-      
+
       function getTransitionPropertyCount(viewElem) {
-        var style = DOM.getComputedStyle(viewElem), property = style["transition-property"];
+        var style = DOM.getComputedStyle(viewElem),
+            property = style["transition-property"] ||
+                style["-webkit-transition-property"] ||
+                style["-moz-transitionProperty"];
+        // console.log(property);
         return property ? property.split(",").length : 0;
       }
-      
+      /*
+      function getTransitionPropertyCount(viewElem) {
+        // console.log(TransitionTracker.PropertyCount);
+        var viewId = viewElem.getAttribute("data-view"),
+            key = name + "_" + viewId,
+            count = TransitionTracker.PropertyCount[key],
+            property,
+            style;
+
+        if(typeof count === "undefined") {
+          style = DOM.getComputedStyle(viewElem);
+          property = style["transition-property"];
+          count = TransitionTracker.PropertyCount[key] = property ? property.split(",").length : 0;
+        }
+        return count;
+      }
+      */
+
       return {
         name: function() {
           if(arguments.length) {
@@ -1902,9 +1959,35 @@ module.exports = Router;
           fromView = toView = null;
         }
       };
-      
+
     }
-    
+    // TransitionTracker.PropertyCount = {};
+
+    /**
+     * A limited feature stage context to be used in views
+     * @param {type} stageInstance
+     * @returns {Object} The context object for use in views
+     */
+    function StageContext(stageInstance) {
+      var stage = stageInstance;
+      return {
+        getViewPort: function() {
+          return stage.getViewPort();
+        },
+        pushView: function(viewId, options) {
+          return stage.pushView(viewId, options);
+        },
+        popView: function(options) {
+          return stage.popView(options);
+        },
+        currentView: function() {
+          return stage.currentView();
+        },
+        previousView: function() {
+          return stage.previousView();
+        }
+      };
+    }
 
     /**
      * Creates a Stage instance
@@ -1922,6 +2005,7 @@ module.exports = Router;
           views = {},
           transitionTracker = TransitionTracker(),
           viewStack = [],
+          context,
           instance;
 
       console.debug("Stage options ", options);
@@ -1948,6 +2032,7 @@ module.exports = Router;
         var selector = '[data-view="' + viewId + '"]',
             viewUi = DOM.selectOne(selector, viewPort),
             viewDef = VIEW_DEFS[viewId],
+            VController,
             viewController,
             view;
 
@@ -1955,17 +2040,22 @@ module.exports = Router;
           throw new Error("UI for view " + viewId + " not found.");
         }
 
-        viewUi.addEventListener(Env.transition.end || "transitionend", handleViewTransitionEnd);
-        viewUi.addEventListener(Env.animation.end || "animationend", handleViewTransitionEnd);
+        viewUi.addEventListener(Env.transition.end || "transitionend", handleViewTransitionEnd, false);
+        viewUi.addEventListener(Env.animation.end || "animationend", handleViewTransitionEnd, false);
 
         // console.debug("Creating view factory for ", viewId);
-        viewController = viewDef.factory(instance, viewUi);
+        // viewController = viewDef.factory(instance, viewUi);
+        /*
+        viewController = viewDef.factory(context, viewUi);
         CONTROLLER_METHODS.forEach(function(m) {
           if(typeof viewController[m] === "undefined") {
             viewController[m] = noop;
           }
         });
+        */
 
+        VController = Util.extend(ViewController, viewDef.factory(context, viewUi));
+        viewController = new VController();
         view = views[viewId] = new View(viewId, viewUi, viewController);
         return view;
       }
@@ -1979,13 +2069,11 @@ module.exports = Router;
       function pushViewInternal(viewId, viewOptions) {
         var view = views[viewId],
             currentView,
-            transition = "transition" in viewOptions
-                ? viewOptions.transition
-                : defaultTransition,
+            transition = "transition" in viewOptions ? viewOptions.transition : defaultTransition,
             transitionUI = function() {
               if(currentView) dispatchBeforeViewTransitionEvent("out", currentView);
               dispatchBeforeViewTransitionEvent("in", view);
-              
+
               raf(function() {
                 if(currentView) {
                   stackViewUI(currentView, transition);
@@ -1993,12 +2081,12 @@ module.exports = Router;
                 pushViewUI(view, transition);
               });
             };
-            
-            
+
+
         // Transitions are set on the view port
         // console.debug("pushView(): Using transition ", transition);
         var currTransition = transitionTracker.name();
-        
+
         if(currTransition !== transition) {
           transitionTracker.name(transition);
           if(currTransition) {DOM.removeClass(viewPort, currTransition);}
@@ -2062,7 +2150,7 @@ module.exports = Router;
             transitionUI = function() {
               dispatchBeforeViewTransitionEvent("out", currentView);
               dispatchBeforeViewTransitionEvent("in", view);
-              
+
               raf(function() {
                 popViewUI(currentView, transition);
                 unstackViewUI(view, transition);
@@ -2089,7 +2177,7 @@ module.exports = Router;
         // We are actually transitioning
         DOM.addClass(viewPort, "view-transitioning");
         view.show(true);
-        
+
         transitionTracker.from(currentView).to(view);
 
         currentView.controller.deactivate();
@@ -2152,6 +2240,15 @@ module.exports = Router;
         }
       }
 
+      function dispatchViewLoad(type, viewId, error) {
+        // setTimeout(function() {
+          DOM.dispatchEvent("viewload" + type, {
+            element: viewPort,
+            data: {viewId: viewId, error: error}
+          });
+        // }, 1);
+      }
+
       function dispatchViewTransitionEvents(type, view) {
         DOM.dispatchEvent("viewtransition" + type, {
           element: viewPort,
@@ -2163,7 +2260,7 @@ module.exports = Router;
           element: view.element
         });
       }
-      
+
       function dispatchBeforeViewTransitionEvent(tType, view) {
         DOM.dispatchEvent("beforeviewtransition" + tType, {
           element: viewPort,
@@ -2180,11 +2277,18 @@ module.exports = Router;
 
       function handleViewTransitionEnd(e) {
         var viewElement = e.target,
-            viewId = DOM.data(viewElement, "viewId"),
-            view = views[viewId],
+            viewId = viewElement.getAttribute("data-view"), // DOM.data(viewElement, "viewId"),
+            view,
             tType,
             currTransition,
             currView;
+
+        if(!viewId) {
+          // Not our transition end event (Bubbled from children)
+          return;
+        }
+
+        view = views[viewId];
 
         if(!transitionTracker.transitionEnded(view)) {
           // console.log("Transition pending for", view.id, e.propertyName);
@@ -2204,9 +2308,9 @@ module.exports = Router;
           view.show(false);
           tType = "out";
         }
-        
+
         dispatchViewTransitionEvents(tType, view);
-        
+
         if(!transitionTracker.inProgress()) {
           // console.log("Transition complete!");
           transitionTracker.clear();
@@ -2228,7 +2332,8 @@ module.exports = Router;
           return viewPort;
         },
         pushView: function(viewId, opts) {
-          var view = views[viewId],
+          var self = this,
+              view = views[viewId],
               viewDef,
               viewOptions = Util.shallowCopy({}, opts);
 
@@ -2237,9 +2342,23 @@ module.exports = Router;
             console.log("pushView() View transitioin in progress. Ignoring this call");
             return;
           }
-          
+
           transitionTracker.inProgress(true);
 
+          if(!view) {
+            self.loadView(viewId, function(viewData) {
+              if(viewData.error) {
+                // clear transition states when there are errors
+                transitionTracker.clear();
+                throw new Error("Error loading view: " + viewData.error);
+              }
+              pushViewInternal(viewId, viewOptions);
+            });
+          }else {
+            pushViewInternal(viewId, viewOptions);
+          }
+
+          /*
           if(!view) {
             viewDef = VIEW_DEFS[viewId];
             if(!viewDef) {
@@ -2248,7 +2367,7 @@ module.exports = Router;
               throw new Error("Don't know of view: " + viewId);
             }
             if(!viewDef.factory) {
-              loadView(viewDef.templatePath, viewPort, function(viewData) {
+              self.loadView(viewDef.templatePath, viewPort, function(viewData) {
                 if(viewData.error) {
                   // clear transition states when there are errors
                   transitionTracker.clear();
@@ -2262,6 +2381,7 @@ module.exports = Router;
           }else {
             pushViewInternal(viewId, viewOptions);
           }
+          */
         },
         popView: function(opts) {
           var viewOptions = Util.shallowCopy({}, opts), toViewId = viewOptions.toView;
@@ -2274,7 +2394,7 @@ module.exports = Router;
           if(viewStack.length < 2) {
             throw new Error("Can't pop. One or less view(s)");
           }
-          
+
           // Indicate that we are transitionin from current view
           transitionTracker.inProgress(true);
 
@@ -2305,8 +2425,29 @@ module.exports = Router;
         },
         isTransitionInProgress: function() {
           return transitionTracker.inProgress();
+        },
+        loadView: function(viewId, callback) {
+          var viewDef = VIEW_DEFS[viewId];
+          if(!viewDef) {
+            throw new Error("Don't know of view: " + viewId);
+          }
+          if(!viewDef.factory) {
+            dispatchViewLoad("start", viewId);
+            loadView(viewDef.templatePath, viewPort, function(viewData) {
+              callback({viewId: viewId, error: viewData.error});
+              dispatchViewLoad("end", viewId, viewData.error);
+            });
+          }else {
+            callback({viewId: viewId, error: false});
+          }
+        },
+        getViewController: function(viewId) {
+          return views[viewId].controller;
         }
       };
+
+      // This is used as context in view factory
+      context = StageContext(instance);
 
       return instance;
     }
@@ -2324,7 +2465,7 @@ module.exports = Router;
      * value.
      * {
      *    "main": "views/main.html",
-     *    "about": "views/about.html" 
+     *    "about": "views/about.html"
      * }
      * @param {type} views
      * @returns {undefined}
@@ -2332,14 +2473,14 @@ module.exports = Router;
     Stage.views = function(views) {
       var def;
       for(var viewId in views) {
-        if(!views.hasOwnProperty(viewId)) {
+        if(!Util.ownsProperty(views, viewId)) {
           continue;
         }
         def = getOrCreateViewDef(viewId);
         def.templatePath = views[viewId];
       }
     };
-    
+
     /**
      * Register a singel view with stage
      * @param {type} viewId The id of the view. e.g. "main"
