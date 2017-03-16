@@ -2,16 +2,7 @@
 #### A simple view lifecycle and management library for HTML5 apps.
 
 
-
-### Introduction
------
-
-
-
-### Features
------
-
-
 ### Documentation
 -----
 
+Please check [https://naikus.github.io/stage](https://naikus.github.io/stage)
