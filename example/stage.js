@@ -336,7 +336,7 @@
   /* ----------------------------------- Stage Implementation ----------------------------------- */
   var Stage = (function() {
     var VIEW_DEFS = {},
-        CONTROLLER_METHODS = ["initialize", "activate", "update", "deactivate", "destroy"],
+        // CONTROLLER_METHODS = ["initialize", "activate", "update", "deactivate", "destroy"],
         noop = function() {},
         raf = (requestAnimationFrame ||
             global.mozRequestAnimationFrame ||
@@ -639,6 +639,7 @@
       constructor: ViewController,
       initialize: function() {},
       activate: function() {},
+      update: function() {},
       deactivate: function() {},
       destroy: function() {}
     };
