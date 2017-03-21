@@ -336,7 +336,6 @@
   /* ----------------------------------- Stage Implementation ----------------------------------- */
   var Stage = (function() {
     var VIEW_DEFS = {},
-        // CONTROLLER_METHODS = ["initialize", "activate", "update", "deactivate", "destroy"],
         noop = function() {},
         raf = (requestAnimationFrame ||
             global.mozRequestAnimationFrame ||
@@ -805,16 +804,6 @@
         viewUi.addEventListener(Env.animation.end || "animationend", handleViewTransitionEnd, false);
 
         // console.debug("Creating view factory for ", viewId);
-        // viewController = viewDef.factory(instance, viewUi);
-        /*
-        viewController = viewDef.factory(context, viewUi);
-        CONTROLLER_METHODS.forEach(function(m) {
-          if(typeof viewController[m] === "undefined") {
-            viewController[m] = noop;
-          }
-        });
-        */
-
         VController = Util.extend(ViewController, viewDef.factory(context, viewUi));
         viewController = new VController();
         view = views[viewId] = new View(viewId, viewUi, viewController);
