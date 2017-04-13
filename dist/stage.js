@@ -481,6 +481,26 @@
       toElement.appendChild(script);
     }
 
+    // Adds remote script as inline EXPERIMENTAL!!
+    /*
+    function addRemoteScript(src, toElement, callback) {
+      var script = document.createElement("script");
+      ajax({
+        path: src,
+        method: "GET",
+        success: function(xhr) {
+          script.setAttribute("data-src", src);
+          addInlineScript(xhr.responseText, toElement, true);
+          callback(src);
+        },
+        fail: function(err, xhr) {
+          console.log("Error loading script", src, err);
+          callback(src, err, xhr);
+        }
+      });
+    }
+    */
+
     /**
      * Loads the view template along with the scripts the view has defined into the viewPort
      * @param {String} path The view template path
@@ -1206,8 +1226,16 @@
     /* ------------------------------------ Some static functions ------------------------------- */
 
     Stage.defineView = function(viewId, factory) {
+      var options = viewId, templatePath;
+      if(typeof options === "object") {
+        viewId = options.id;
+        factory = options.factory;
+        templatePath = options.template;
+      }
+
       var def = getOrCreateViewDef(viewId, factory);
       def.factory = factory;
+      def.templatePath = templatePath;
     };
 
     /**

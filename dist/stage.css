@@ -32,10 +32,18 @@
   -webkit-backface-visibility: hidden;
 }
 .stage-view.showing {
-  z-index: 99;
   display: block !important;
 }
 /* ------------------------ Various outofthebox transitions for views  -------------------------- */
+.stage-view.pop {
+  z-index: 99;
+}
+.stage-view.in {
+  z-index: 98;
+}
+.stage-view.stack {
+  z-index: 97;
+}
 .slide .stage-view {
   -moz-transform: translate3d(100%, 0, 0);
   -webkit-transform: translate3d(100%, 0, 0);
@@ -63,7 +71,6 @@
   transform: none;
 }
 .slide .stage-view.stack {
-  z-index: 98;
   -moz-transform: translate3d(-60%, 0, 0);
   -webkit-transform: translate3d(-60%, 0, 0);
   -o-transform: translate3d(-60%, 0, 0);
@@ -119,7 +126,6 @@
   transform: none;
 }
 .fancy .stage-view.stack {
-  z-index: 98;
   -moz-transform: translate(-70%, 0) scale(0.8, 0.8);
   -webkit-transform: translate3d(-70%, 0, 0) scale(0.8, 0.8);
   -o-transform: translate(-70%, 0) scale(0.8, 0.8);
@@ -160,7 +166,6 @@
   opacity: 1;
 }
 .lollipop .stage-view.stack {
-  z-index: 98;
   -moz-transform: translate3d(0, -50px, 0);
   -webkit-transform: translate3d(0, -50px, 0);
   -o-transform: translate3d(0, -50px, 0);
@@ -195,7 +200,6 @@
   transform: none;
 }
 .slide-up .stage-view.stack {
-  z-index: 98;
   -moz-transform: translate(0, -1px) scale(0.95, 0.95);
   -webkit-transform: translate3d(0, -1px, 0) scale(0.95, 0.95);
   -o-transform: translate(0, -1px) scale(0.95, 0.95);
@@ -234,7 +238,6 @@
   transform: none;
 }
 .slide-down .stage-view.stack {
-  z-index: 98;
   -moz-transform: translate(0, 1px) scale(0.95, 0.95);
   -webkit-transform: translate3d(0, 1px, 0) scale(0.95, 0.95);
   -o-transform: translate(0, 1px) scale(0.95, 0.95);

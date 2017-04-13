@@ -4,25 +4,28 @@
   <script src="four.js"></script>
   <script>
     // var Stage = require("stage");
-    Stage.defineView("four", function(stageContext, viewUi) {
-      dummy(); // from four.js
-      return {
-        initialize: function() {
-          document.getElementById("btn6").addEventListener(ACTION, function() {
-            stageContext.popView();
-          }, false);
-        },
-        activate: function(opts, done) {
-          var counter = 5, timerId, counterElem = document.getElementById("actionbar");
-          timerId = setInterval(function() {
-            if(!counter) {
-              clearInterval(timerId);
-              done();
-            }
-            counterElem.innerHTML = (counter--);
-          }, 500);
-        }
-      };
+    Stage.defineView({
+      id: "four", 
+      factory: function(stageContext, viewUi) {
+        dummy(); // from four.js
+        return {
+          initialize: function() {
+            document.getElementById("btn6").addEventListener(ACTION, function() {
+              stageContext.popView();
+            }, false);
+          },
+          activate: function(opts, done) {
+            var counter = 5, timerId, counterElem = document.getElementById("actionbar");
+            timerId = setInterval(function() {
+              if(!counter) {
+                clearInterval(timerId);
+                done();
+              }
+              counterElem.innerHTML = (counter--);
+            }, 500);
+          }
+        };
+      }
     });
   </script>
 </div>
