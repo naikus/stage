@@ -93,6 +93,11 @@
   }
   &.in {
     z-index: 98;
+    /* 
+    * This will allow the view to have fixed elements. If the value is 'transform' the fixed
+    * elements will scroll 
+    */
+    will-change: auto;
   }
   &.stack {
     z-index: 97;
