@@ -76,6 +76,7 @@ gulp.task("build", ["build-lib"], function() {
 gulp.task("example", ["build"], function() {
   connect.server({
     root: "example",
+    host: "0.0.0.0",
     post: 8080
   });
 });

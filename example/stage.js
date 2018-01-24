@@ -388,7 +388,9 @@
           transitionDelay: 100,
           transition: "slide"
         },
-        NO_TRANSITION = "no-transition";
+        DEFAULT_VIEW_TEMPLATE = '<div class="stage-view"></div>',
+        NO_TRANSITION = "no-transition",
+        JS_EXPR = /\.js$/;
 
     // console.log(Env);
 
@@ -465,15 +467,25 @@
      */
     function addRemoteScript(src, toElement, callback) {
       var script = document.createElement("script");
+      script.onerror = function() {
+        callback({
+          error: true,
+          src: src
+        });
+      };
       if("onreadystatechange" in script) {
         script.onreadystatechange = function() {
           if(this.readyState === "loaded" || this.readyState === "complete") {
-            callback(src);
+            callback({
+              src: src
+            });
           }
         };
       }else {
         script.onload = function() {
-          callback(src);
+          callback({
+            src: src
+          });
         };
       }
       script.src = src;
@@ -483,7 +495,7 @@
 
     // Adds remote script as inline EXPERIMENTAL!!
     /*
-    function addRemoteScript(src, toElement, callback) {
+    function addRemoteScriptAsInline(src, toElement, callback) {
       var script = document.createElement("script");
       ajax({
         path: src,
@@ -491,11 +503,11 @@
         success: function(xhr) {
           script.setAttribute("data-src", src);
           addInlineScript(xhr.responseText, toElement, true);
-          callback(src);
+          callback({src: src});
         },
         fail: function(err, xhr) {
           console.log("Error loading script", src, err);
-          callback(src, err, xhr);
+          callback({error: err, src: src});
         }
       });
     }
@@ -503,12 +515,13 @@
 
     /**
      * Loads the view template along with the scripts the view has defined into the viewPort
-     * @param {String} path The view template path
+     * @param {String} viewDef The view definition containing 'path' i.e. path to html template
      * @param {Element} viewPort The viewport element
      * @param {function} callback The function to call after the view has been loaded
      * @returns {undefined}
      */
-    function loadView(path, viewPort, callback) {
+    function loadView(viewDef, viewPort, callback) {
+      var path = viewDef.path;
       ajax({
         path: path,
         method: "GET",
@@ -519,7 +532,10 @@
                 var type = se.getAttribute("type") || "text/javascript";
                 return type.indexOf("/javascript") !== -1;
               }),
-              processScripts = function() {
+              processScripts = function(result) {
+                if(result && result.error) {
+                  console.log("Error loading script", result.src, result.error);
+                }
                 var script, src;
                 if(scriptElements.length) {
                   script = scriptElements.shift();
@@ -563,12 +579,60 @@
       });
     }
 
+    function loadJsView(viewDef, viewPort, callback) {
+      var viewId = viewDef.id,
+          path = viewDef.path,
+          template = viewDef.template || DEFAULT_VIEW_TEMPLATE,
+          div = document.createElement("div");
+
+      div.className = "view-holder";
+      div.setAttribute("data-view-template", path);
+      div = viewPort.appendChild(div);
+      addRemoteScript(path, div, function(result) {
+        callback({
+          path: result.src,
+          element: div,
+          error: result.error
+        });
+      });
+    }
+
+    function createViewUiFromTemplate(template, viewId) {
+      var viewFragment = DOM.asFragment(template),
+          viewUi = viewFragment.firstChild;
+      DOM.addClass(viewUi, "stage-view");
+      viewUi.setAttribute("data-view", viewId);
+      return viewUi;
+    }
+
+    function findViewUi(viewDef, viewPort) {
+      var viewId = viewDef.id,
+          selector = '[data-view="' + viewId + '"]',
+          holderSelector = '[data-view-template="' + viewDef.path + '"]',
+          viewHolder,
+          viewUi;
+      // See if view already in viewport
+      viewUi = DOM.selectOne(selector, viewPort);
+      if(!viewUi) {
+        viewUi = createViewUiFromTemplate(viewDef.template || DEFAULT_VIEW_TEMPLATE, viewId);
+        viewHolder = DOM.selectOne(holderSelector, viewPort);
+        if(viewHolder) {
+          viewUi = viewHolder.insertBefore(viewUi, viewHolder.firstChild);
+        }else {
+          viewUi = viewPort.appendChild(viewUi);
+        }
+        return viewUi;
+      }else {
+        return viewUi;
+      }    
+    }
+
     /*
      *
      * View definition
      * {
      *    id: "view-id",
-     *    templatePath: "/path/to/template",
+     *    path: "/path/to/template",
      *    factory: factory function that creates view controller
      * }
      *
@@ -810,13 +874,15 @@
        */
       function prepareView(viewId) {
         var selector = '[data-view="' + viewId + '"]',
-            viewUi = DOM.selectOne(selector, viewPort),
+            // viewUi = DOM.selectOne(selector, viewPort),
             viewDef = VIEW_DEFS[viewId],
+            viewUi = findViewUi(viewDef, viewPort),
             VController,
             viewController,
             view;
 
         if(!viewUi) {
+          // console.log(viewDef);
           throw new Error("UI for view " + viewId + " not found.");
         }
 
@@ -1127,31 +1193,6 @@
           }else {
             pushViewInternal(viewId, viewOptions);
           }
-
-          /*
-          if(!view) {
-            viewDef = VIEW_DEFS[viewId];
-            if(!viewDef) {
-              // clear transition states when there are errors
-              transitionTracker.clear();
-              throw new Error("Don't know of view: " + viewId);
-            }
-            if(!viewDef.factory) {
-              self.loadView(viewDef.templatePath, viewPort, function(viewData) {
-                if(viewData.error) {
-                  // clear transition states when there are errors
-                  transitionTracker.clear();
-                  throw new Error("Error loading view: " + viewData.error);
-                }
-                pushViewInternal(viewId, viewOptions);
-              });
-            }else {
-              pushViewInternal(viewId, viewOptions);
-            }
-          }else {
-            pushViewInternal(viewId, viewOptions);
-          }
-          */
         },
         popView: function(opts) {
           var viewOptions = Util.shallowCopy({}, opts), toViewId = viewOptions.toView;
@@ -1197,18 +1238,25 @@
           return transitionTracker.inProgress();
         },
         loadView: function(viewId, callback) {
-          var viewDef = VIEW_DEFS[viewId];
+          var viewDef = VIEW_DEFS[viewId],
+              path,
+              handleViewLoaded = function(viewData) {
+                callback({viewId: viewId, error: viewData.error});
+                dispatchViewLoad("end", viewId, viewData.error);
+              };
           if(!viewDef) {
             throw new Error("Don't know of view: " + viewId);
           }
-          if(!viewDef.factory) {
+          if(!viewDef.factory) { // We have a possibly remote view
             dispatchViewLoad("start", viewId);
-            loadView(viewDef.templatePath, viewPort, function(viewData) {
-              callback({viewId: viewId, error: viewData.error});
-              dispatchViewLoad("end", viewId, viewData.error);
-            });
+            path = viewDef.path;
+            if(JS_EXPR.test(path)) {
+              loadJsView(viewDef, viewPort, handleViewLoaded);
+            }else {
+              loadView(viewDef, viewPort, handleViewLoaded);
+            }
           }else {
-            callback({viewId: viewId, error: false});
+            callback({viewId: viewId});
           }
         },
         getViewController: function(viewId) {
@@ -1226,16 +1274,16 @@
     /* ------------------------------------ Some static functions ------------------------------- */
 
     Stage.defineView = function(viewId, factory) {
-      var options = viewId, templatePath;
+      var options = viewId, template;
       if(typeof options === "object") {
         viewId = options.id;
         factory = options.factory;
-        templatePath = options.template;
+        template = options.template;
       }
 
       var def = getOrCreateViewDef(viewId, factory);
       def.factory = factory;
-      def.templatePath = templatePath;
+      def.template = template;
     };
 
     /**
@@ -1243,30 +1291,31 @@
      * value.
      * {
      *    "main": "views/main.html",
-     *    "about": "views/about.html"
+     *    "about": "views/about.html",
+     *    "other": "views/other.js"
      * }
      * @param {type} views
      * @returns {undefined}
      */
     Stage.views = function(views) {
-      var def;
+      var def, path;
       for(var viewId in views) {
         if(!Util.ownsProperty(views, viewId)) {
           continue;
         }
         def = getOrCreateViewDef(viewId);
-        def.templatePath = views[viewId];
+        def.path = views[viewId];
       }
     };
 
     /**
      * Register a singel view with stage
      * @param {type} viewId The id of the view. e.g. "main"
-     * @param {type} templatePath The path of the view template (html) e.g. "views/main.html"
+     * @param {type} path The path of the view template (html) e.g. "views/main.html" or js "views/main.js"
      */
-    Stage.view = function(viewId, templatePath) {
+    Stage.view = function(viewId, path) {
       var def = getOrCreateViewDef(viewId);
-      def.templatePath = templatePath;
+      def.path = path;
     };
 
     return Stage;
