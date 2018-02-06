@@ -59,6 +59,8 @@
         padding: 10px;
         padding-top: 60px;
         text-align: center;
+        background-color: #586d82;
+        color: #fff;
       }
       .stage-view h2 {
         display: inline-block;
@@ -93,6 +95,10 @@
         background: #21CCFF;
         color: #fff;
       }
+      .five {
+        background: rgb(233, 161, 6);
+        color: #fff;
+      }
     </style>
   </head>
 
@@ -109,11 +115,6 @@
         <h2 id="btn2">&#171;</h2>
         <h2 id="btn3">&#187;</h2>
       </div>
-      <div class="stage-view three" data-view="three">
-        <h1>View Three</h1>
-        <h2 id="btn4">&#171;</h2>
-        <h2 id="btn5">&#187;</h2>
-      </div>
     </div>
     <div id="actionbar">WELCOME</div>
 
@@ -129,14 +130,17 @@
           actionbar = document.getElementById("actionbar");
 
 
-      Stage.defineView("one", function(stageContext, viewUi) {
-        return {
-          initialize: function() {
-            document.getElementById("btn1").addEventListener(ACTION, function() {
-              stageContext.pushView('two', {transition: 'slide'});
-            }, false);
-          }
-        };
+      Stage.defineView({
+        id: "one", 
+        factory: function(stageContext, viewUi) {
+          return {
+            initialize: function() {
+              document.getElementById("btn1").addEventListener(ACTION, function() {
+                stageContext.pushView('two', {transition: 'slide'});
+              }, false);
+            }
+          };
+        }
       });
 
       Stage.defineView("two", function(stageContext, viewUi) {
@@ -152,25 +156,34 @@
         };
       });
 
-      Stage.defineView("three", function(stageContext, viewUi) {
-        return {
-          initialize: function() {
-            document.getElementById("btn4").addEventListener(ACTION, function() {
-              stageContext.popView();
-            }, false);
-            document.getElementById("btn5").addEventListener(ACTION, function() {
-              stageContext.pushView('four', {transition: "lollipop"});
-            }, false);
-          },
-          activate: function(options, done) {
-            actionbar.innerHTML = "Loading...";
-            // Simulate delay (Should not affect transition smoothness)
-            setTimeout(function() {
-              // Tell the stage that we are done
-              done();
-            }, 200);
-          }
-        };
+      Stage.defineView({
+        id: "three",
+        template: `<div class="stage-view three">
+          <h1>View Three</h1>
+          <p>Clicking &#187; will show the view after some delay</p>
+          <h2 id="btn4">&#171;</h2>
+          <h2 id="btn5">&#187;</h2>
+        </div>`,
+        factory: function(stageContext, viewUi) {
+          return {
+            initialize: function() {
+              document.getElementById("btn4").addEventListener(ACTION, function() {
+                stageContext.popView();
+              }, false);
+              document.getElementById("btn5").addEventListener(ACTION, function() {
+                stageContext.pushView('four', {transition: "lollipop"});
+              }, false);
+            },
+            activate: function(options, done) {
+              actionbar.innerHTML = "Loading...";
+              // Simulate delay (Should not affect transition smoothness)
+              setTimeout(function() {
+                // Tell the stage that we are done
+                done();
+              }, 200);
+            }
+          };
+        }
       });
 
 
@@ -183,12 +196,14 @@
 
       var stage = Stage({
         // viewport: "#viewPort",
-        viewport: viewPort
+        viewport: viewPort,
+        transition: "lollipop"
       });
 
       // Define a fourth external view
       Stage.views({
-        "four": "view-four.html"
+        "four": "view-four.html",
+        "five": "five.js"
       });
 
       setTimeout(function() {

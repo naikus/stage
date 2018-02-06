@@ -16,13 +16,13 @@
 }
 
 .scaleAndTranslate(@tx: 0, @ty: 0, @tz: 0, @sx: 1, @sy: 1) {
-  -moz-transform: translate(@tx, @ty) scale(@sx, @sy);
+  -moz-transform: translate3d(@tx, @ty, @tz) scale(@sx, @sy);
   
   // In older webkits on android, this causes the whole page to jump up and down
   // when typing, in input fields
   -webkit-transform: translate3d(@tx, @ty, @tz) scale(@sx, @sy);
   // -webkit-transform: translate(@x, @y) scale(@sx, @sy);
-  -o-transform: translate(@tx, @ty) scale(@sx, @sy);
+  -o-transform: translate3d(@tx, @ty, @tz) scale(@sx, @sy);
   -ms-transform: translate3d(@tx, @ty, @tz) scale(@sx, @sy);
   transform: translate3d(@tx, @ty, @tz) scale(@sx, @sy);
 }
