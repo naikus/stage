@@ -269,9 +269,7 @@
         }
         // event.data = options.data;
         for(var k in data) {
-          if(Util.ownsProperty(data, k)) {
-            event[k] = data[k];
-          }
+          event[k] = data[k];
         }
         node.dispatchEvent(event);
       },
