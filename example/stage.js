@@ -966,6 +966,7 @@
         if(currentView) {
           currentView.controller.deactivate();
         }
+        viewStack.push(view);
         var viewActivate = view.controller.activate;
         if(viewActivate.length === 2) { // expects acync activation
           view.controller.activate(viewOptions, function() {
@@ -976,7 +977,7 @@
           view.controller.activate(viewOptions);
           setTimeout(transitionUI, options.transitionDelay);
         }
-        viewStack.push(view);
+        // viewStack.push(view);
       }
 
       function popViewInternal(viewOptions, toView) {
@@ -1026,6 +1027,14 @@
         viewOptions.viewAction = ACTION_POP;
 
         currentView.controller.deactivate();
+
+        if(toView) {
+          // Remove upto 'view' views from the stack
+          viewStack.splice(idx + 1, viewStack.length - (idx + 1));
+        }else {
+          viewStack.pop();
+        }
+
         var viewActivate = view.controller.activate;
         if(viewActivate.length === 2) { // expects acync activation
           view.controller.activate(viewOptions, function() {
@@ -1035,13 +1044,6 @@
           // @TODO Add Promise API support?
           view.controller.activate(viewOptions);
           setTimeout(transitionUI, options.transitionDelay);
-        }
-
-        if(toView) {
-          // Remove upto 'view' views from the stack
-          viewStack.splice(idx + 1, viewStack.length - (idx + 1));
-        }else {
-          viewStack.pop();
         }
       }
 
