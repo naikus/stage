@@ -994,19 +994,25 @@
               });
             };
 
-        currentView = viewStack.pop();
+        // currentView = viewStack.pop();
+        currentView = viewStack[viewStack.length - 1];
         if(toView) {
           idx = indexOfView(toView);
           if(idx === -1) {
-            viewStack.push(currentView);
+            // viewStack.push(currentView);
             transitionTracker.clear();
             throw new Error("View " + toView + " is not on stack");
           }
+          if(idx === viewStack.length - 1) {
+            transitionTracker.clear();
+            throw new Error("Cannot pop to the current view: " + toView);
+          }
           view = viewStack[idx];
           // Remove upto 'view' views from the stack
-          viewStack.splice(idx + 1, viewStack.length - (idx + 1));
+          // viewStack.splice(idx + 1, viewStack.length - (idx + 1));
         }else {
-          view = viewStack[viewStack.length - 1];
+          // view = viewStack[viewStack.length - 1];
+          view = viewStack[viewStack.length - 2];
         }
 
         // Check if this view has a 'stack' class
@@ -1029,6 +1035,13 @@
           // @TODO Add Promise API support?
           view.controller.activate(viewOptions);
           setTimeout(transitionUI, options.transitionDelay);
+        }
+
+        if(toView) {
+          // Remove upto 'view' views from the stack
+          viewStack.splice(idx + 1, viewStack.length - (idx + 1));
+        }else {
+          viewStack.pop();
         }
       }
 
