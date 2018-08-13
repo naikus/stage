@@ -824,16 +824,11 @@
         popView: function(options) {
           return stage.popView(options);
         },
-        /*
         currentView: function() {
           return stage.currentView();
         },
         previousView: function() {
           return stage.previousView();
-        }
-        */
-        indexOfView: function(id) {
-          return stage.indexOfView(id)
         }
       };
     }
@@ -1232,7 +1227,6 @@
 
           popViewInternal(viewOptions, toViewId);
         },
-        /*
         currentView: function() {
           var currView = viewStack[viewStack.length - 1];
           return currView ? currView.id : null;
@@ -1245,7 +1239,6 @@
           }
           return null;
         },
-        */
         indexOfView: function(viewId) {
           var index = -1;
           viewStack.some(function(v, i) {
