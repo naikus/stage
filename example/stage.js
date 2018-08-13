@@ -388,7 +388,9 @@
         },
         DEFAULT_VIEW_TEMPLATE = '<div class="stage-view"></div>',
         NO_TRANSITION = "no-transition",
-        JS_EXPR = /\.js$/;
+        JS_EXPR = /\.js$/,
+        ACTION_PUSH = "push",
+        ACTION_POP = "pop";
 
     // console.log(Env);
 
@@ -916,6 +918,7 @@
               });
             };
 
+        viewOptions.viewAction = ACTION_PUSH;
 
         // Transitions are set on the view port
         // console.debug("pushView(): Using transition ", transition);
@@ -1013,6 +1016,8 @@
         view.show(true);
 
         transitionTracker.from(currentView).to(view);
+        viewOptions.fromView = currentView.id;
+        viewOptions.viewAction = ACTION_POP;
 
         currentView.controller.deactivate();
         var viewActivate = view.controller.activate;

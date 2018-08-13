@@ -152,6 +152,9 @@
             document.getElementById("btn3").addEventListener(ACTION, function() {
               stageContext.pushView('three', {transition: 'fancy'});
             }, false);
+          },
+          activate(options) {
+            console.log(options);
           }
         };
       });
