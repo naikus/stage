@@ -810,9 +810,10 @@
     /**
      * A limited feature stage context to be used in views
      * @param {type} stageInstance
+     * @param {Object} context The external context
      * @returns {Object} The context object for use in views
      */
-    function StageContext(stageInstance) {
+    function ViewContext(stageInstance, context) {
       var stage = stageInstance;
       return {
         getViewPort: function() {
@@ -829,6 +830,9 @@
         },
         previousView: function() {
           return stage.previousView();
+        },
+        context: function() {
+          return context;
         }
       };
     }
@@ -1285,7 +1289,7 @@
       };
 
       // This is used as context in view factory
-      context = StageContext(instance);
+      context = ViewContext(instance, options.context || {});
 
       return instance;
     }

@@ -132,29 +132,30 @@
 
       Stage.defineView({
         id: "one", 
-        factory: function(stageContext, viewUi) {
+        factory: function(stage, viewUi) {
           return {
             initialize: function() {
               document.getElementById("btn1").addEventListener(ACTION, function() {
-                stageContext.pushView('two', {transition: 'slide'});
+                stage.pushView('two', {transition: 'slide'});
               }, false);
             }
           };
         }
       });
 
-      Stage.defineView("two", function(stageContext, viewUi) {
+      Stage.defineView("two", function(stage, viewUi) {
         return {
           initialize: function() {
             document.getElementById("btn2").addEventListener(ACTION, function() {
-              stageContext.popView();
+              stage.popView();
             }, false);
             document.getElementById("btn3").addEventListener(ACTION, function() {
-              stageContext.pushView('three', {transition: 'fancy'});
+              stage.pushView('three', {transition: 'fancy'});
             }, false);
           },
           activate(options) {
             console.log(options);
+            stage.context().application.hello();
           }
         };
       });
@@ -167,14 +168,14 @@
           <h2 id="btn4">&#171;</h2>
           <h2 id="btn5">&#187;</h2>
         </div>`,
-        factory: function(stageContext, viewUi) {
+        factory: function(stage, viewUi) {
           return {
             initialize: function() {
               document.getElementById("btn4").addEventListener(ACTION, function() {
-                stageContext.popView();
+                stage.popView();
               }, false);
               document.getElementById("btn5").addEventListener(ACTION, function() {
-                stageContext.pushView('four', {transition: "lollipop"});
+                stage.pushView('four', {transition: "lollipop"});
               }, false);
             },
             activate: function(options, done) {
@@ -200,7 +201,14 @@
       var stage = Stage({
         // viewport: "#viewPort",
         viewport: viewPort,
-        transition: "lollipop"
+        transition: "lollipop",
+        context: {
+          application: {
+            hello: function() {
+              alert("Hello");
+            }
+          }
+        }
       });
 
       // Define a fourth external view
