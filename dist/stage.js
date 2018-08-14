@@ -984,6 +984,7 @@
         var currentView,
             view,
             idx,
+            beginSlice,
             transition = transitionTracker.name(),
             transitionUI = function() {
               dispatchBeforeViewTransitionEvent("out", currentView);
@@ -1003,14 +1004,15 @@
             // viewStack.push(currentView);
             transitionTracker.clear();
             throw new Error("View " + toView + " is not on stack");
-          }
-          if(idx === viewStack.length - 1) {
+          }else if(idx === viewStack.length - 1) {
             transitionTracker.clear();
             throw new Error("Cannot pop to the current view: " + toView);
+          }else {
+            view = viewStack[idx];
+            beginSlice = idx + 1;
+            // Remove upto 'view' views from the stack
+            // viewStack.splice(beginSlice, viewStack.length - beginSlice);
           }
-          view = viewStack[idx];
-          // Remove upto 'view' views from the stack
-          // viewStack.splice(idx + 1, viewStack.length - (idx + 1));
         }else {
           // view = viewStack[viewStack.length - 1];
           view = viewStack[viewStack.length - 2];
@@ -1030,7 +1032,7 @@
 
         if(toView) {
           // Remove upto 'view' views from the stack
-          viewStack.splice(idx + 1, viewStack.length - (idx + 1));
+          viewStack.splice(beginSlice, viewStack.length - beginSlice);
         }else {
           viewStack.pop();
         }
