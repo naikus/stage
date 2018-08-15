@@ -534,7 +534,7 @@
               }),
               processScripts = function(result) {
                 if(result && result.error) {
-                  console.log("Error loading script", result.src, result.error);
+                  console.error("Error loading script", result.src, result.error);
                 }
                 var script, src;
                 if(scriptElements.length) {
@@ -1210,9 +1210,11 @@
               if(viewData.error) {
                 // clear transition states when there are errors
                 transitionTracker.clear();
-                throw new Error("Error loading view: " + viewData.error);
+                // throw new Error("Error loading view: " + viewData.error);
+                console.error("Error loading view", viewData);
+              }else {
+                pushViewInternal(viewId, viewOptions);
               }
-              pushViewInternal(viewId, viewOptions);
             });
           }else {
             pushViewInternal(viewId, viewOptions);
@@ -1265,7 +1267,7 @@
           var viewDef = VIEW_DEFS[viewId],
               path,
               handleViewLoaded = function(viewData) {
-                callback({viewId: viewId, error: viewData.error});
+                callback({viewId: viewId, error: viewData.error, path: viewData.path});
                 dispatchViewLoad("end", viewId, viewData.error);
               };
           if(!viewDef) {
