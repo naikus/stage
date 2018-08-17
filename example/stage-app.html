@@ -136,7 +136,7 @@
           return {
             initialize: function() {
               document.getElementById("btn1").addEventListener(ACTION, function() {
-                stage.pushView('two', {transition: 'slide'});
+                stage.pushView('two', {transition: 'slide-up'});
               }, false);
             }
           };
@@ -152,10 +152,12 @@
             document.getElementById("btn3").addEventListener(ACTION, function() {
               stage.pushView('three', {transition: 'fancy'});
             }, false);
+            viewUi.addEventListener("transitionin", function() {
+              actionbar.innerHTML = stage.context().application.title();
+            });
           },
           activate(options) {
             console.log(options);
-            stage.context().application.hello();
           }
         };
       });
@@ -204,8 +206,8 @@
         transition: "lollipop",
         context: {
           application: {
-            hello: function() {
-              alert("Hello");
+            title: function() {
+              return "Hello from external context";
             }
           }
         }
@@ -218,7 +220,7 @@
       });
 
       setTimeout(function() {
-        stage.pushView("one", {transition: "slide-down"});
+        stage.pushView("one", {transition: "slide-up"});
       }, 500);
     </script>
   </body>
