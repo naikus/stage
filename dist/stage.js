@@ -1271,7 +1271,9 @@
                 dispatchViewLoad("end", viewId, viewData.error);
               };
           if(!viewDef) {
-            throw new Error("Don't know of view: " + viewId);
+            var err = new Error("View not defined: " + viewId);
+            callback({viewId: viewId, error: err});
+            return;
           }
           if(!viewDef.factory) { // We have a possibly remote view
             dispatchViewLoad("start", viewId);
