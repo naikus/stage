@@ -4,7 +4,7 @@ var gulp = require("gulp"),
     concat = require("gulp-concat"),
     uglify = require("gulp-uglify"),
     less = require("gulp-less"),
-    eventStream = require("event-stream"),
+    mergestream = require("merge-stream"),
     connect = require("gulp-connect");
 
 
@@ -16,7 +16,7 @@ var config = {
   }
 };
 
-gulp.task("default", function() {
+gulp.task("default", function(cb) {
   console.log("Available tasks:");
   console.log([
     "------------------------------------------------------------------------",
@@ -24,6 +24,7 @@ gulp.task("default", function() {
     "clean           Clean the dest directory",
     "-------------------------------------------------------------------------"
   ].join("\n"));
+  cb();
 });
 
 
@@ -48,35 +49,36 @@ gulp.task("lessc", function() {
 });
 
 
-gulp.task("build-lib", [], function() {
+gulp.task("build-lib", gulp.parallel("jshint", "lessc", function() {
    // do other build things
-   gulp.start("jshint");
-   gulp.start("lessc");
+   // gulp.start("jshint");
+   // gulp.start("lessc");
 
-   return eventStream.merge(
+   return mergestream(
       gulp.src(["src/stage.js"]/*, {debug: true}*/)
             .pipe(concat("stage.js"))
             .pipe(gulp.dest(config.dist.dir))
             .pipe(concat("stage.min.js"))
             .pipe(gulp.dest(config.dist.dir))
-            .pipe(uglify({comments: /^\/\*\!*/}))
+            .pipe(uglify())
             .pipe(gulp.dest(config.dist.dir)),
 
       gulp.src(["src/stage.less"])
             .pipe(concat("stage.less"))
             .pipe(gulp.dest(config.dist.dir))
    );
-});
-
-gulp.task("build", ["build-lib"], function() {
-  gulp.src(config.dist.dir + "/**/*.*").pipe(gulp.dest("example"));
-});
+}));
 
 
-gulp.task("example", ["build"], function() {
+gulp.task("build", gulp.series("build-lib", function() {
+  return gulp.src(config.dist.dir + "/**/*.*").pipe(gulp.dest("example"));
+}));
+
+
+gulp.task("example", gulp.series("build", function() {
   connect.server({
     root: "example",
     host: "0.0.0.0",
     post: 8080
   });
-});
+}));

@@ -9,14 +9,14 @@
   "main": "src/stage.js",
   "devDependencies": {
     "del": "^2.2.0",
-    "event-stream": "^3.3.2",
-    "gulp": "^3.9.1",
-    "gulp-concat": "^2.6.0",
-    "gulp-connect": "^3.2.2",
-    "gulp-jshint": "^2.0.0",
-    "gulp-less": "^3.0.5",
-    "gulp-uglify": "^1.5.3",
-    "jshint": "^2.9.1",
+    "gulp": "^4.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-connect": "^5.7.0",
+    "gulp-jshint": "^2.1.0",
+    "gulp-less": "^4.0.1",
+    "gulp-uglify": "^3.0.1",
+    "jshint": "^2.9.7",
+    "merge-stream": "^1.0.1",
     "yargs": "^4.4.0"
   }
 }
