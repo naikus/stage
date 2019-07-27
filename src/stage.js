@@ -870,6 +870,15 @@
         transitionTracker.name(defaultTransition);
       }
 
+      global.addEventListener("unload", function() {
+        for(var key in views) {
+          var view = views[key];
+          if(view && view.controller) {
+            view.controller.destroy();
+          }
+        }
+      });
+
       /**
        * Prepares the view from view definition (as defined by Stage.defineView()). This method
        * calls the factory and creates the view controller specific to this Stage instance
