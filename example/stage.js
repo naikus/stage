@@ -521,7 +521,7 @@
      * @returns {undefined}
      */
     function loadView(viewDef, viewPort, callback) {
-      var path = viewDef.path;
+      var path = viewDef.path, id = viewDef.id;
       ajax({
         path: path,
         method: "GET",
@@ -560,6 +560,7 @@
 
           // set some div attrs
           div.className = "view-holder";
+          div.setAttribute("data-view-id", id);
           div.setAttribute("data-view-template", path);
           div.appendChild(viewFragment);
 
@@ -582,10 +583,11 @@
     function loadJsView(viewDef, viewPort, callback) {
       var viewId = viewDef.id,
           path = viewDef.path,
-          template = viewDef.template || DEFAULT_VIEW_TEMPLATE,
+          // template = viewDef.template || DEFAULT_VIEW_TEMPLATE,
           div = document.createElement("div");
 
       div.className = "view-holder";
+      div.setAttribute("data-view-id", viewId);
       div.setAttribute("data-view-template", path);
       div = viewPort.appendChild(div);
       addRemoteScript(path, div, function(result) {
@@ -869,6 +871,15 @@
         // transitionState.transition = defaultTransition;
         transitionTracker.name(defaultTransition);
       }
+
+      global.addEventListener("unload", function() {
+        for(var key in views) {
+          var view = views[key];
+          if(view && view.controller) {
+            view.controller.destroy();
+          }
+        }
+      });
 
       /**
        * Prepares the view from view definition (as defined by Stage.defineView()). This method

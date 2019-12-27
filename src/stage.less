@@ -15,7 +15,7 @@
   transform: translate3d(@x, @y, @z);
 }
 
-.scaleAndTranslate(@tx: 0, @ty: 0, @tz: 0, @sx: 1, @sy: 1) {
+.translateAndScale(@tx: 0, @ty: 0, @tz: 0, @sx: 1, @sy: 1) {
   -moz-transform: translate3d(@tx, @ty, @tz) scale(@sx, @sy);
   
   // In older webkits on android, this causes the whole page to jump up and down
@@ -150,7 +150,7 @@
 
 .fancy {
   .stage-view {
-    .scaleAndTranslate(100%);
+    .translateAndScale(100%);
     .transition-transform(500ms, @bezier-func);
 
     &.pop {
@@ -160,7 +160,7 @@
       .transformNone;
     }
     &.stack {
-      .scaleAndTranslate(-70%, 0, 0, 0.8, 0.8);
+      .translateAndScale(-70%, 0, 0, 0.8, 0.8);
       .transition-transform(650ms, @bezier-func);
     }
   }
@@ -200,7 +200,7 @@
 
 .slide-up {
   .stage-view {
-    .scaleAndTranslate(0, 100%);
+    .translateAndScale(0, 100%);
     .transition-transform(600ms, @bezier-func);
 
     &.pop {
@@ -210,7 +210,7 @@
       .transformNone;
     }
     &.stack {
-      .scaleAndTranslate(0, -1px, 0, 0.95, 0.95);
+      .translateAndScale(0, -1px, 0, 0.95, 0.95);
       .transition-transform(650ms, @bezier-func);
     }
   }
@@ -218,7 +218,7 @@
 
 .slide-down {
   .stage-view {
-    .scaleAndTranslate(0, -100%);
+    .translateAndScale(0, -100%);
     .transition-transform(600ms, @bezier-func);
 
     &.pop {
@@ -228,7 +228,7 @@
       .transformNone;
     }
     &.stack {
-      .scaleAndTranslate(0, 1px, 0, 0.95, 0.95);
+      .translateAndScale(0, 1px, 0, 0.95, 0.95);
       .transition-transform(650ms, @bezier-func);
     }
   }
