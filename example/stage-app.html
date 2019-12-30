@@ -122,6 +122,24 @@
       #actionbar.five {
         background: rgb(167, 115, 5);
       }
+      
+      .fade-in .stage-view {
+        opacity: 0;
+        -moz-transition: opacity 350ms ease;
+        -webkit-transition: opacity 350ms ease;
+        -o-transition: opacity 350ms ease;
+        -ms-transition: opacity 350ms ease;
+        transition: opacity 350ms ease;
+      }
+      .fade-in .stage-view.pop {
+        opacity: 0;
+      }
+      .fade-in .stage-view.in {
+        opacity: 1;
+      }
+      .fade-in .stage-view.stack {
+        opacity: 0.99;
+      }
     </style>
   </head>
 

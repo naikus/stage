@@ -6,7 +6,7 @@ function heroTransition(stageContext, viewUi) {
       },
       onTransitionEnd = function(e) {
         stageContext.pushView("five", {
-          transition: "fade"
+          transition: "fade-in"
         });
       };
   return {
