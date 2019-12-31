@@ -10,10 +10,6 @@ Stage.defineView({
     var dt;
     return {
       initialize: function() {
-        viewUi.addEventListener(ACTION, function() {
-          stageContext.popView({toView: "one"});
-        });
-
         document.getElementById("btn8").addEventListener(ACTION, function () {
           stageContext.popView();
         }, false);
