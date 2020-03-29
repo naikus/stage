@@ -812,7 +812,6 @@
     /**
      * A limited feature stage context to be used in views
      * @param {type} stage
-     * @param {Object} context The external context
      * @returns {Object} The context object for use in views
      */
     function createDefaultViewContext(stage) {
@@ -1296,6 +1295,9 @@
         },
         getViewController: function(viewId) {
           return views[viewId].controller;
+        },
+        getViewContext: function() {
+          return context;
         }
       };
 
