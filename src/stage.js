@@ -1295,6 +1295,9 @@
         },
         getViewController: function(viewId) {
           return views[viewId].controller;
+        },
+        getViewContext: function() {
+          return context;
         }
       };
 
