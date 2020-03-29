@@ -163,7 +163,7 @@
 
 
 
-    <script src="stage.js"> </script>
+    <script src="stage.min.js"> </script>
     <script>
       var ACTION = ("ontouchstart" in document.documentElement) ? "touchstart" : "click";
 
@@ -194,7 +194,7 @@
               stage.pushView('three', {transition: 'fancy'});
             }, false);
             viewUi.addEventListener("transitionin", function() {
-              actionbar.innerHTML = stage.context().application.title();
+              actionbar.innerHTML = stage.application.title();
             });
           },
           activate(options) {
@@ -246,10 +246,12 @@
         // viewport: "#viewPort",
         viewport: viewPort,
         transition: "lollipop",
-        context: {
-          application: {
-            title: function() {
-              return "Hello from external context";
+        contextFactory: function(stage) {
+          return {
+            application: {
+              title: function() {
+                return "Hello from external context";
+              }
             }
           }
         }

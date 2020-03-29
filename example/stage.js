@@ -811,12 +811,11 @@
 
     /**
      * A limited feature stage context to be used in views
-     * @param {type} stageInstance
+     * @param {type} stage
      * @param {Object} context The external context
      * @returns {Object} The context object for use in views
      */
-    function ViewContext(stageInstance, context) {
-      var stage = stageInstance;
+    function createDefaultViewContext(stage) {
       return {
         getViewPort: function() {
           return stage.getViewPort();
@@ -832,9 +831,6 @@
         },
         previousView: function() {
           return stage.previousView();
-        },
-        context: function() {
-          return context;
         }
       };
     }
@@ -1304,8 +1300,13 @@
       };
 
       // This is used as context in view factory
-      context = ViewContext(instance, options.context || {});
-
+      var defaultContext = createDefaultViewContext(instance),
+          contextFactory = options.contextFactory,
+          externalContext;
+      if(typeof contextFactory === "function") {
+        externalContext = contextFactory(instance, opts);
+      }
+      context = externalContext ? Util.shallowCopy({}, defaultContext, externalContext) : defaultContext;
       return instance;
     }
 

@@ -2,10 +2,15 @@ var gulp = require("gulp"),
     del = require("del"),
     jshint = require("gulp-jshint"),
     concat = require("gulp-concat"),
-    uglify = require("gulp-uglify"),
+    // uglify = require("gulp-uglify"),
+    terser = require("gulp-terser"),
     less = require("gulp-less"),
     mergestream = require("merge-stream"),
-    connect = require("gulp-connect");
+    connect = require("gulp-connect"),
+    errorHandler = name => e => {
+      console.error(name + ": " + e.toString());
+      console.log(e);
+    };
 
 
 var config = {
@@ -60,7 +65,9 @@ gulp.task("build-lib", gulp.parallel("jshint", "lessc", function() {
             .pipe(gulp.dest(config.dist.dir))
             .pipe(concat("stage.min.js"))
             .pipe(gulp.dest(config.dist.dir))
-            .pipe(uglify())
+            .pipe(terser({
+              ie8: true
+            })).on("error", errorHandler("Terser"))
             .pipe(gulp.dest(config.dist.dir)),
 
       gulp.src(["src/stage.less"])
