@@ -11,15 +11,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
 
     <meta http-equiv="cleartype" content="on" />
-
-    <link rel="stylesheet" type="text/css" href="stage.css" />
+    <meta name="theme-color" content="#456" />
+    <link rel="stylesheet" type="text/css" href="css/stage.css" />
     <style>
       body {
-        font-family: sans-serif;
+        font-family: "Helvetica Neue", sans-serif;
         font-size: 1em;
       }
       #viewPort {
-        background-color: #333;
+        background-color: #232a33;
         position: absolute;
         /*
         width: 60%;
@@ -39,6 +39,7 @@
         box-sizing: border-box;
         top: 0;
         left: 0;
+        /* background-color: #232d37; */
         background-color: #456;
         border: 1px solid rgba(0,0,0,0.1);
         color: #fff;
@@ -49,16 +50,17 @@
         -moz-user-select: none;
         -webkit-user-select: none;
         -ms-user-select: none;
-        /* font-weight: bold; */
-        padding: 24px 18px 0;
         min-height: 60px;
         box-shadow: 0 0 5px rgba(0,0,0,0.2);
         transition: background 500ms ease;
+        letter-spacing: 4px;
+        font-family: 'Arial Black';
+        display: flex;
+        align-items: center;
       }
       .stage-view {
-        padding: 10px;
+        padding: 25px;
         padding-top: 60px;
-        text-align: center;
         background-color: #586d82;
         color: #fff;
       }
@@ -71,7 +73,7 @@
         padding: 10px;
         padding-top: 5px;
         border-radius: 4px;
-        margin: 5px;
+        margin-right: 10px;
         border: 1px solid rgba(0,0,0,0.1);
         cursor: pointer;
         -webkit-touch-callout: none;
@@ -80,65 +82,35 @@
         -webkit-user-select: none;
         -ms-user-select: none;
       }
+      .stage-view p {
+        line-height: 1.3em;
+        font-size: 1.1em;
+      }
       .stage-view .btn:active {
         background: #345;
       }
       .one {
-        background: #A2D8A0;
-      }
-      #actionbar.one {
-        background: rgb(100, 129, 100);
-        color: #fff;
+        background: #B9CC98;
       }
 
       .two {
-        background: skyblue;
-        color: #456;
-      }
-      #actionbar.two {
-        background: rgb(75, 144, 172);
+        background: #739aaa;
+        color: #fafafa;
       }
 
       .three {
-        background: #FF7B7B;
+        background: #D77E8E;
         color: #fff;
-      }
-      #actionbar.three {
-        background: rgb(167, 80, 80);
       }
 
       .four {
-        background: #21CCFF;
+        background: #61B0C8;
         color: #fff;
-      }
-      #actionbar.four {
-        background: rgb(23, 138, 173);
       }
 
       .five {
-        background: rgb(233, 161, 6);
+        background: rgb(213, 178, 104);
         color: #fff;
-      }
-      #actionbar.five {
-        background: rgb(167, 115, 5);
-      }
-      
-      .fade-in .stage-view {
-        opacity: 0;
-        -moz-transition: opacity 350ms ease;
-        -webkit-transition: opacity 350ms ease;
-        -o-transition: opacity 350ms ease;
-        -ms-transition: opacity 350ms ease;
-        transition: opacity 350ms ease;
-      }
-      .fade-in .stage-view.pop {
-        opacity: 0;
-      }
-      .fade-in .stage-view.in {
-        opacity: 1;
-      }
-      .fade-in .stage-view.stack {
-        opacity: 0.99;
       }
     </style>
   </head>
@@ -153,6 +125,8 @@
       </div>
       <div class="stage-view two" data-view="two">
         <h1>View Two</h1>
+        <p>Shows message below that can be passed from an external context.</p>
+        <p class="message"></p>
         <button class="btn" id="btn2">&#171;</button>
         <button class="btn" id="btn3">&#187;</button>
       </div>
@@ -163,9 +137,9 @@
 
 
 
-    <script src="stage.min.js"> </script>
+    <script src="js/stage.js"> </script>
     <script>
-      var ACTION = ("ontouchstart" in document.documentElement) ? "touchstart" : "click";
+      var ACTION = ("ontouchend" in document.documentElement) ? "touchend" : "click";
 
       var viewPort = document.getElementById("viewPort"),
           actionbar = document.getElementById("actionbar");
@@ -173,28 +147,28 @@
 
       Stage.defineView({
         id: "one", 
-        factory: function(stage, viewUi) {
+        factory: function(view_context, viewUi) {
           return {
             initialize: function() {
               document.getElementById("btn1").addEventListener(ACTION, function() {
-                stage.pushView('two', {transition: 'slide-up'});
+                view_context.pushView('two', {transition: 'slide-up'});
               }, false);
             }
           };
         }
       });
 
-      Stage.defineView("two", function(stage, viewUi) {
+      Stage.defineView("two", function(view_context, viewUi) {
         return {
           initialize: function() {
             document.getElementById("btn2").addEventListener(ACTION, function() {
               stage.popView();
             }, false);
             document.getElementById("btn3").addEventListener(ACTION, function() {
-              stage.pushView('three', {transition: 'fancy'});
+              view_context.pushView('three', {transition: 'fancy'});
             }, false);
             viewUi.addEventListener("transitionin", function() {
-              actionbar.innerHTML = stage.application.title();
+              viewUi.querySelector(".message").innerHTML = view_context.title();
             });
           },
           activate(options) {
@@ -207,18 +181,18 @@
         id: "three",
         template: `<div class="stage-view three">
           <h1>View Three</h1>
-          <p>Clicking &#187; will show the view after some delay</p>
+          <p>Clicking &#187; will show the next view after some delay</p>
           <button class="btn" id="btn4">&#171;</button>
           <button class="btn" id="btn5">&#187;</button>
         </div>`,
-        factory: function(stage, viewUi) {
+        factory: function(view_context, viewUi) {
           return {
             initialize: function() {
               document.getElementById("btn4").addEventListener(ACTION, function() {
-                stage.popView();
+                view_context.popView();
               }, false);
               document.getElementById("btn5").addEventListener(ACTION, function() {
-                stage.pushView('four', {transition: "lollipop"});
+                view_context.pushView('four', {transition: "lollipop"});
               }, false);
             },
             activate: function(options, done) {
@@ -248,19 +222,17 @@
         transition: "lollipop",
         contextFactory: function(stage) {
           return {
-            application: {
-              title: function() {
-                return "Hello from external context";
-              }
+            title: function() {
+              return "Hello from external context";
             }
-          }
+          };
         }
       });
 
       // Define a fourth external view
       Stage.views({
-        "four": "view-four.html",
-        "five": "five.js"
+        "four": "views/four/view-four.html",
+        "five": "views/five.js"
       });
 
       setTimeout(function() {

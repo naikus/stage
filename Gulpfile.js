@@ -78,7 +78,18 @@ gulp.task("build-lib", gulp.parallel("jshint", "lessc", function() {
 
 
 gulp.task("build", gulp.series("build-lib", function() {
-  return gulp.src(config.dist.dir + "/**/*.*").pipe(gulp.dest("example"));
+  var dist = config.dist.dir;
+  return mergestream(
+    gulp.src([
+      dist + "/*.css",
+      dist + "/*.less"
+    ]).pipe(gulp.dest("example/css")),
+
+    gulp.src([
+      dist + "/*.js"
+    ]).pipe(gulp.dest("example/js")),
+  );
+  // return gulp.src(config.dist.dir + "/**/*.*").pipe(gulp.dest("example"));
 }));
 
 

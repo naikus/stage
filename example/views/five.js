@@ -4,18 +4,18 @@ Stage.defineView({
     <h1>View Five</h1>
     <p id="dt"></p>
     <button class="btn" id="btn8">&#171;</button>
-    <button class="btn" id="btn9">&#187;</button>
+    <button class="btn" id="btn9">&#171;&#171;</button>
   </div>`,
-  factory: function(stageContext, viewUi) {
+  factory: function(view_context, viewUi) {
     var dt;
     return {
       initialize: function() {
         document.getElementById("btn8").addEventListener(ACTION, function () {
-          stageContext.popView();
+          view_context.popView();
         }, false);
 
         document.getElementById("btn9").addEventListener(ACTION, function () {
-          stageContext.popView({toView: "one"});
+          view_context.popView({toView: "one"});
         }, false);
 
         dt = document.getElementById("dt");
