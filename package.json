@@ -18,6 +18,6 @@
     "gulp-uglify": "^3.0.1",
     "jshint": "^2.9.7",
     "merge-stream": "^1.0.1",
-    "yargs": "^4.4.0"
+    "yargs": "^15.3.1"
   }
 }
