@@ -10,6 +10,7 @@ Stage.defineView({
     var dt;
     return {
       initialize: function() {
+        console.log("View five configuration", this.config);
         document.getElementById("btn8").addEventListener(ACTION, function () {
           view_context.popView();
         }, false);

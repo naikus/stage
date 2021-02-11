@@ -718,8 +718,13 @@
       }
     };
 
-
-    function ViewController() {}
+    /**
+     * Create a new view controller
+     * @param {Object} config Any configuration passed to Stage.defineView call 
+     */
+    function ViewController(config) {
+      this.config = config;
+    }
     ViewController.prototype = {
       constructor: ViewController,
       initialize: function() {},
@@ -886,6 +891,7 @@
         var selector = '[data-view="' + viewId + '"]',
             // viewUi = DOM.selectOne(selector, viewPort),
             viewDef = VIEW_DEFS[viewId],
+            viewConfig = viewDef.config,
             viewUi = findViewUi(viewDef, viewPort),
             VController,
             viewController,
@@ -901,8 +907,8 @@
 
         // console.debug("Creating view factory for ", viewId);
         VController = Util.extend(ViewController, viewDef.factory(context, viewUi));
-        viewController = new VController();
-        view = views[viewId] = new View(viewId, viewUi, viewController);
+        viewController = new VController(viewConfig);
+        view = views[viewId] = new View(viewId, viewUi, viewController, viewConfig);
         return view;
       }
 
@@ -1298,6 +1304,9 @@
         },
         getViewContext: function() {
           return context;
+        },
+        getViewConfig: function() {
+          return views[viewId].controller.config;
         }
       };
 
@@ -1332,32 +1341,45 @@
      * Register multiple views with stage. The object contains view id as key and template path as
      * value.
      * {
-     *    "main": "views/main.html",
-     *    "about": "views/about.html",
-     *    "other": "views/other.js"
+     *    "main": {
+     *      path: "views/main.html",
+     *      config: {}
+     *    }
+     *    "about": {
+     *      path: "views/about.html",
+     *      config: {
+     *        any: "value"
+     *      }
+     *    }
+     *    "other": {
+     *      path: "views/other.js"
+     *    }
      * }
-     * @param {type} views
-     * @returns {undefined}
+     * @param {Object} views The views object with keys being view id
      */
     Stage.views = function(views) {
-      var def, path;
+      var def, conf;
       for(var viewId in views) {
         if(!Util.ownsProperty(views, viewId)) {
           continue;
         }
+        conf = views[viewId];
         def = getOrCreateViewDef(viewId);
-        def.path = views[viewId];
+        def.path = conf.path;
+        def.config = conf.config || {};
       }
     };
 
     /**
      * Register a singel view with stage
-     * @param {type} viewId The id of the view. e.g. "main"
-     * @param {type} path The path of the view template (html) e.g. "views/main.html" or js "views/main.js"
+     * @param {String} viewId The id of the view. e.g. "main"
+     * @param {String} path The path of the view template (html) e.g. "views/main.html" or js "views/main.js"
+     * @param {String} config Optional configuration object that can be used via stage.getViewConfig() API
      */
-    Stage.view = function(viewId, path) {
+    Stage.view = function(viewId, path, config) {
       var def = getOrCreateViewDef(viewId);
       def.path = path;
+      def.config = config || {};
     };
 
     return Stage;

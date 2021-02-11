@@ -231,8 +231,15 @@
 
       // Define a fourth external view
       Stage.views({
-        "four": "views/four/view-four.html",
-        "five": "views/five.js"
+        "four": {
+          path: "views/four/view-four.html"
+        },
+        "five": {
+          path: "views/five.js",
+          config: {
+            "hello": "world"
+          }
+        }
       });
 
       setTimeout(function() {
