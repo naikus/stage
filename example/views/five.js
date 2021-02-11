@@ -6,11 +6,11 @@ Stage.defineView({
     <button class="btn" id="btn8">&#171;</button>
     <button class="btn" id="btn9">&#171;&#171;</button>
   </div>`,
-  factory: function(view_context, viewUi) {
+  factory: function(view_context, viewUi, viewConfig) {
     var dt;
     return {
       initialize: function() {
-        console.log("View five configuration", this.config);
+        console.log("View five configuration", viewConfig);
         document.getElementById("btn8").addEventListener(ACTION, function () {
           view_context.popView();
         }, false);

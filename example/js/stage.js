@@ -639,11 +639,12 @@
      * }
      *
      */
-    function getOrCreateViewDef(viewId) {
+    function getOrCreateViewDef(viewId, config) {
       var def = VIEW_DEFS[viewId];
       if(!def) {
         def = VIEW_DEFS[viewId] = {
-          id: viewId
+          id: viewId,
+          config: config || {}
         };
       }
       return def;
@@ -655,11 +656,13 @@
      * @param {String} id The id of the view
      * @param {Element} elem The view DOM element
      * @param {ViewController} controller view controller for the view
+     * @param {Object} config Any configuration passed to Stage.defineView call
      */
-    function View(id, elem, controller) {
+    function View(id, elem, controller, config) {
       this.id = id;
       this.element = elem;
       this.controller = controller;
+      this.config = config;
       // DOM.data(this.element, "viewId", id);
     }
     View.prototype = {
@@ -720,11 +723,8 @@
 
     /**
      * Create a new view controller
-     * @param {Object} config Any configuration passed to Stage.defineView call 
      */
-    function ViewController(config) {
-      this.config = config;
-    }
+    function ViewController() {}
     ViewController.prototype = {
       constructor: ViewController,
       initialize: function() {},
@@ -906,8 +906,8 @@
         viewUi.addEventListener(Env.animation.end || "animationend", handleViewTransitionEnd, false);
 
         // console.debug("Creating view factory for ", viewId);
-        VController = Util.extend(ViewController, viewDef.factory(context, viewUi));
-        viewController = new VController(viewConfig);
+        VController = Util.extend(ViewController, viewDef.factory(context, viewUi, viewConfig));
+        viewController = new VController();
         view = views[viewId] = new View(viewId, viewUi, viewController, viewConfig);
         return view;
       }
@@ -1305,8 +1305,8 @@
         getViewContext: function() {
           return context;
         },
-        getViewConfig: function() {
-          return views[viewId].controller.config;
+        getViewConfig: function(viewId) {
+          return views[viewId].config;
         }
       };
 
@@ -1332,7 +1332,7 @@
         template = options.template;
       }
 
-      var def = getOrCreateViewDef(viewId, factory);
+      var def = getOrCreateViewDef(viewId);
       def.factory = factory;
       def.template = template;
     };
@@ -1364,9 +1364,8 @@
           continue;
         }
         conf = views[viewId];
-        def = getOrCreateViewDef(viewId);
+        def = getOrCreateViewDef(viewId, conf.config);
         def.path = conf.path;
-        def.config = conf.config || {};
       }
     };
 
@@ -1377,9 +1376,8 @@
      * @param {String} config Optional configuration object that can be used via stage.getViewConfig() API
      */
     Stage.view = function(viewId, path, config) {
-      var def = getOrCreateViewDef(viewId);
+      var def = getOrCreateViewDef(viewId, config);
       def.path = path;
-      def.config = config || {};
     };
 
     return Stage;

@@ -207,15 +207,6 @@
         }
       });
 
-
-      viewPort.addEventListener("viewtransitionin", function(e) {
-        actionbar.innerHTML = "VIEW " + e.viewId.toUpperCase();
-      }, false);
-      viewPort.addEventListener("beforeviewtransitionin", function(e) {
-        actionbar.innerHTML = "";
-        // actionbar.className = e.viewId;
-      }, false);
-
       var stage = Stage({
         // viewport: "#viewPort",
         viewport: viewPort,
@@ -241,6 +232,15 @@
           }
         }
       });
+
+      viewPort.addEventListener("viewtransitionin", function(e) {
+        actionbar.innerHTML = "VIEW " + e.viewId.toUpperCase();
+      }, false);
+      viewPort.addEventListener("beforeviewtransitionin", function(e) {
+        actionbar.innerHTML = "";
+        // console.log(e.viewId, stage.getViewConfig(e.viewId));
+        // actionbar.className = e.viewId;
+      }, false);
 
       setTimeout(function() {
         stage.pushView("one", {transition: "slide-up"});
