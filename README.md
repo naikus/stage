@@ -4,7 +4,7 @@
 Check out the live [demo](https://codepen.io/naikus/project/full/AzkkER) 
 (POC uses plain javascript and HTML)
 
-Also see the starter app that uses (vidom) [Stage Starter](https://github.com/naikus/stage-starter)
+Also see the starter app that uses (Inferno js) [Stage Starter](https://github.com/naikus/stage-starter-inferno)
 ### Documentation
 -----
 
