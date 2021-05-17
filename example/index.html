@@ -151,7 +151,7 @@
           return {
             initialize: function() {
               document.getElementById("btn1").addEventListener(ACTION, function() {
-                view_context.pushView('two', {transition: 'slide-up'});
+                view_context.pushView('two', {transition: 'slide-up'/*, replace: true */});
               }, false);
             }
           };
@@ -210,7 +210,7 @@
       var stage = Stage({
         // viewport: "#viewPort",
         viewport: viewPort,
-        transition: "lollipop",
+        transition: "lollipop", // null,
         contextFactory: function(stage) {
           return {
             title: function() {
@@ -243,7 +243,7 @@
       }, false);
 
       setTimeout(function() {
-        stage.pushView("one", {transition: "slide-up"});
+        stage.pushView("one");
       }, 500);
     </script>
   </body>

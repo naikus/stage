@@ -201,6 +201,15 @@
       return true;
     }
 
+    function _replaceClass(elem, clName, newClName) {
+      var cList = elem.classList;
+      if(!cList || !clName) {
+        return false;
+      }
+      cList.replace(clName, newClName);
+      return true;
+    }
+
     function hasClass(element, clName) {
       return classRe(clName).test(element.className);
     }
@@ -274,36 +283,31 @@
         node.dispatchEvent(event);
       },
       hasClass: hasClass,
-      addClass: function(elements, clName) {
-        var el;
-        if(elements.length) {
-          for(var i = 0, len = elements.length; i < len; i += 1) {
-            el = elements[i];
-            if(!hasClass(el, clName) && !_addClass(el, clName)) {
-               el.className += " " + clName;
-            }
-          }
-        }else {
-          el = elements;
-          if(!hasClass(el, clName) && !_addClass(el, clName)) {
-             el.className += " " + clName;
-          }
+      addClass: function(element, clName) {
+        if(!hasClass(element, clName) && !_addClass(element, clName)) {
+          element.className += " " + clName;
         }
         return this;
       },
-      removeClass: function(elements, clName) {
+      removeClass: function(element, clName) {
+        if(hasClass(element, clName) && !_removeClass(element, clName)) {
+          element.className = Util.trim(element.className.replace(classRe(clName), "$1"));
+        }
+        return this;
+      },
+      replaceClass: function(elements, clName, newClName) {
         var el;
-        if(elements.length) {
-          for(var i = 0, len = elements.length; i < len; i += 1) {
+        if (elements.length) {
+          for (var i = 0, len = elements.length; i < len; i += 1) {
             el = elements[i];
-            if(hasClass(el, clName) && !_removeClass(el, clName)) {
-               el.className = Util.trim(el.className.replace(classRe(clName), "$1"));
+            if (!_replaceClass(el, clName, newClName)) {
+              el.className = Util.trim(el.className.replace(classRe(clName), newClName));
             }
           }
-        }else {
+        } else {
           el = elements;
-          if(hasClass(el, clName) && !_removeClass(el, clName)) {
-             el.className = Util.trim(el.className.replace(classRe(clName), "$1"));
+          if (!_replaceClass(el, clName, newClName)) {
+            el.className = Util.trim(el.className.replace(classRe(clName), newClName));
           }
         }
         return this;
@@ -514,6 +518,18 @@
     */
 
     /**
+     * Return an already created view holder for whom the view load may have failed. This is because each laod
+     * action should not create view holder elements
+     * @param {String} id The view id
+     * @returns 
+     */
+    function getViewDiv(id) {
+      var div = DOM.selectOne("[view-data-id=" + id + "]") || document.createElement("div");
+      // div.innerHTML = "";
+      return div;
+    }
+
+    /**
      * Loads the view template along with the scripts the view has defined into the viewPort
      * @param {String} viewDef The view definition containing 'path' i.e. path to html template
      * @param {Element} viewPort The viewport element
@@ -526,7 +542,7 @@
         path: path,
         method: "GET",
         success: function(xhr) {
-          var div = document.createElement("div"),
+          var div = getViewDiv(id), // document.createElement("div"),
               viewFragment = DOM.asFragment(xhr.responseText),
               scriptElements = Util.slice(DOM.select("script", viewFragment)).filter(function(se) {
                 var type = se.getAttribute("type") || "text/javascript";
@@ -584,7 +600,7 @@
       var viewId = viewDef.id,
           path = viewDef.path,
           // template = viewDef.template || DEFAULT_VIEW_TEMPLATE,
-          div = document.createElement("div");
+          div = getViewDiv(viewId); // document.createElement("div");
 
       div.className = "view-holder";
       div.setAttribute("data-view-id", viewId);
@@ -683,8 +699,11 @@
       },
       stack: function() {
         if(!DOM.hasClass(this.element, "stack")) {
+          /*
           DOM.removeClass(this.element, "in")
               .addClass(this.element, "stack");
+          */
+          DOM.replaceClass(this.element, "in", "stack");
         }
         return this;
       },
@@ -692,9 +711,10 @@
          return DOM.hasClass(this.element, "stack");
       },
       unStack: function(unstackClass) {
-        DOM.removeClass(this.element, "stack");
         if(unstackClass) {
-            DOM.addClass(this.element, "unstack");
+          DOM.replaceClass(this.element, "stack", "unstack");
+        }else {
+          DOM.removeClass(this.element, "stack");
         }
         return this;
       },
@@ -702,8 +722,8 @@
         return DOM.hasClass(this.element, "unstack");
       },
       pop: function() {
-        DOM.removeClass(this.element, "in").addClass(this.element, "pop");
-        // DOM.replaceClass(this.element, "in", "pop");
+        // DOM.removeClass(this.element, "in").addClass(this.element, "pop");
+        DOM.replaceClass(this.element, "in", "pop");
         return this;
       },
       wasPopped: function() {
@@ -866,11 +886,14 @@
 
       var defaultTransition = options.transition;
 
+      /*
+      // @TODO This may not be necessary because pushViewInternal will set the default transition viewport class
       if(defaultTransition) {
         DOM.addClass(viewPort, defaultTransition);
         // transitionState.transition = defaultTransition;
         transitionTracker.name(defaultTransition);
       }
+      */
 
       global.addEventListener("unload", function() {
         for(var key in views) {
@@ -921,6 +944,7 @@
       function pushViewInternal(viewId, viewOptions) {
         var view = views[viewId],
             currentView,
+            replace = viewOptions.replace,
             transition = "transition" in viewOptions ? viewOptions.transition : defaultTransition,
             transitionUI = function() {
               if(currentView) dispatchBeforeViewTransitionEvent("out", currentView);
@@ -942,7 +966,9 @@
 
         if(currTransition !== transition) {
           transitionTracker.name(transition);
-          if(currTransition) {DOM.removeClass(viewPort, currTransition);}
+          if(currTransition) {
+            DOM.removeClass(viewPort, currTransition);
+          }
           DOM.addClass(viewPort, transition);
           // console.debug("pushView(): Replacing transition", currTransition, " -> ", transition);
         }
@@ -994,6 +1020,9 @@
           setTimeout(transitionUI, options.transitionDelay);
         }
         // viewStack.push(view);
+        if(replace && currentView) {
+          viewStack.splice(viewStack.length - 2, 1);
+        }
       }
 
       function popViewInternal(viewOptions, toView) {
@@ -1190,8 +1219,11 @@
           currTransition = transitionTracker.name();
           currView = viewStack[viewStack.length - 1];
           if(currTransition !== currView.transition) {
+            /*
             DOM.removeClass(viewPort, currTransition)
                 .addClass(viewPort, currView.transition);
+            */
+            DOM.replaceClass(viewPort, currTransition, currView.transition);
             // console.debug("handleViewTransitionEnd() Replacing transition", currTransition,
             //    " -> ", view.transition);
             transitionTracker.name(currView.transition);
