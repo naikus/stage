@@ -63,7 +63,8 @@
               });
 
             },
-            activate: function(opts, done) {
+            activate: function(opts /*, done */) {
+              /*
               var counter = 3, counterElem = document.getElementById("actionbar");
               timerId = setInterval(function() {
                 if(!counter) {
@@ -72,6 +73,7 @@
                 }
                 counterElem.innerHTML = (counter--);
               }, 100);
+              */
             },
             deactivate: function() {
               clearInterval(timerId);

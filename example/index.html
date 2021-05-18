@@ -195,13 +195,15 @@
                 view_context.pushView('four', {transition: "lollipop"});
               }, false);
             },
-            activate: function(options, done) {
+            activate: function(options /*, done */) {
               actionbar.innerHTML = "Loading...";
               // Simulate delay (Should not affect transition smoothness)
+              /*
               setTimeout(function() {
                 // Tell the stage that we are done
                 done();
               }, 200);
+              */
             }
           };
         }
@@ -244,7 +246,7 @@
 
       setTimeout(function() {
         stage.pushView("one");
-      }, 500);
+      }, 100);
     </script>
   </body>
 </html>
