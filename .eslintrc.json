@@ -1,0 +1,72 @@
+{
+  "extends": ["eslint:recommended", "google"],
+  "plugins": [
+    "standard",
+    "promise"
+  ],
+
+  "globals": {
+    "console": true,
+    "Promise": true,
+    "require": true,
+    "module": true,
+    "exports": true,
+    "document": true,
+    "navigator": true,
+    "window": true
+  },
+
+  "parserOptions": {
+    "ecmaVersion": 8,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true,
+      "jsx": true
+    }
+  },
+
+  "rules": {
+    "semi": [1, "always"],
+    "linebreak-style": ["error", "unix"],
+    "quotes": [1, "double", { "avoidEscape": true, "allowTemplateLiterals": true }],
+    "space-before-function-paren": [0, "never"],
+    "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2 }],
+    "max-len": [1, {
+      "code": 100,
+      "tabWidth": 2,
+      "ignoreUrls": true,
+      "ignorePattern": "^goog\\.(module|require)"
+    }],
+    "require-jsdoc": [1, {
+      "require": {
+        "FunctionDeclaration": true,
+        "MethodDefinition": true,
+        "ClassDeclaration": true
+      }
+    }],
+    "valid-jsdoc": [1, {
+      "requireParamDescription": false,
+      "requireReturnDescription": false,
+      "requireReturn": false,
+      "prefer": {"returns": "return"}
+    }],
+    "no-console": 0,
+    "no-multiple-empty-lines": [1, { "max": 3 }],
+    "comma-dangle": [2, "never"],
+    "arrow-parens": [1, "as-needed", { "requireForBlockBody": false }],
+    "one-var": [1, {
+      "var": "consecutive",
+      "let": "consecutive",
+      "const": "consecutive"
+    }],
+    "keyword-spacing": ["warn", {"overrides": {
+      "if": {"after": false},
+      "else": {"before": false},
+      "catch": {"before": false, "after": false},
+      "for": {"after": false}
+    }}],
+    "no-unused-vars": [1, {"args": "none"}],
+    "no-trailing-spaces": 1,
+    "new-cap": 1
+  }
+}

@@ -126,9 +126,9 @@
       <div class="stage-view two" data-view="two">
         <h1>View Two</h1>
         <p>Shows message below that can be passed from an external context.</p>
-        <p class="message"></p>
         <button class="btn" id="btn2">&#171;</button>
         <button class="btn" id="btn3">&#187;</button>
+        <p class="message"></p>
       </div>
     </div>
     <div id="actionbar">WELCOME</div>
@@ -214,9 +214,13 @@
         viewport: viewPort,
         transition: "lollipop", // null,
         contextFactory: function(stage) {
+          var users = ["Alice", "Bob", "Joe"],
+            getUser = function () {
+              return users[Math.floor(Math.random() * users.length)];
+            };
           return {
-            title: function() {
-              return "Hello from external context";
+            title: function () {
+              return "Hello, " + getUser();
             }
           };
         }
