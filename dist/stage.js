@@ -759,7 +759,7 @@
       var name,
           fromView,
           toView,
-          progressing = false;
+          progressing = false,
           eventCount = {};
 
       function getTransitionPropertyCount(viewElem) {

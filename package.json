@@ -21,5 +21,30 @@
     "jshint": "^2.13.4",
     "merge-stream": "^1.0.1",
     "yargs": "^15.3.1"
+  },
+  "description": "Check out the live [demo](https://codepen.io/naikus/project/full/AzkkER)  (POC uses plain javascript and HTML)",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naikus/stage.git"
+  },
+  "keywords": [
+    "capacitor",
+    "cordova",
+    "mobile-development",
+    "page-slider",
+    "page-transitions",
+    "view-manager",
+    "page-manager",
+    "mobile-library"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/naikus/stage/issues"
   }
 }
