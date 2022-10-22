@@ -151,7 +151,7 @@
           return {
             initialize: function() {
               document.getElementById("btn1").addEventListener(ACTION, function() {
-                view_context.pushView('two', {transition: 'pop-out'/*, replace: true */});
+                view_context.pushView('two', {transition: 'slide-up'/*, replace: true */});
               }, false);
             }
           };
@@ -165,7 +165,7 @@
               stage.popView();
             }, false);
             document.getElementById("btn3").addEventListener(ACTION, function() {
-              view_context.pushView('three', {transition: 'fancy'});
+              view_context.pushView('three', {transition: 'slide-down'});
             }, false);
             viewUi.addEventListener("transitionin", function() {
               viewUi.querySelector(".message").innerHTML = view_context.title();
