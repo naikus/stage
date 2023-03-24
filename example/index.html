@@ -192,7 +192,7 @@
                 view_context.popView();
               }, false);
               document.getElementById("btn5").addEventListener(ACTION, function() {
-                view_context.pushView('four', {transition: "lollipop"});
+                view_context.pushView('four');
               }, false);
             },
             activate: function(options /*, done */) {
@@ -212,7 +212,7 @@
       var stage = Stage({
         // viewport: "#viewPort",
         viewport: viewPort,
-        transition: "lollipop", // null,
+        transition: "slide", // Use null for no transitions
         contextFactory: function(stage) {
           var users = ["Alice", "Bob", "Joe"],
             getUser = function () {
@@ -229,7 +229,10 @@
       // Define a fourth external view
       Stage.views({
         "four": {
-          path: "views/four/view-four.html"
+          path: "views/four/view-four.html",
+          config: {
+            transition: "pop-out"
+          }
         },
         "five": {
           path: "views/five.js",

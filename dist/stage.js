@@ -945,7 +945,11 @@
         var view = views[viewId],
             currentView,
             replace = viewOptions.replace,
-            transition = "transition" in viewOptions ? viewOptions.transition : defaultTransition,
+            // /*
+            viewCfgTranstion = VIEW_DEFS[viewId].config.transition,
+            transition = "transition" in viewOptions ?  viewOptions.transition : viewCfgTranstion || defaultTransition,
+            // */
+            // transition = "transition" in viewOptions ? viewOptions.transition : defaultTransition,
             transitionUI = function() {
               if(currentView) dispatchBeforeViewTransitionEvent("out", currentView);
               dispatchBeforeViewTransitionEvent("in", view);
@@ -1228,8 +1232,27 @@
             //    " -> ", view.transition);
             transitionTracker.name(currView.transition);
           }
+          // runQueuedTransitions();
         }
       }
+
+      // Queuing push/pop view calls if transitions are already in progress
+      /*
+      var transitionQueue = [], viewActions = {PUSH: "pushView", POP: "popView"};
+      function runQueuedTransitions() {
+        var viewData = transitionQueue.shift();
+        if(viewData) {
+          var action = viewData.action, viewId = viewData.viewId, opts = viewData.opts;
+          if(action === viewActions.PUSH) {
+            instance.pushView(viewId, opts);
+          }else if(action === viewActions.POP) {
+            instance.popView(opts);
+          }else {
+            console.log("Update View?")
+          }
+        }
+      }
+      */
 
       instance = {
         getViewPort: function() {
@@ -1244,6 +1267,13 @@
           // If we are already transitioning, ignore this call
           if(transitionTracker.inProgress()) {
             console.log("pushView() View transitioin in progress. Ignoring this call");
+            /*
+            transitionQueue.push({
+              viewId: viewId,
+              opts: opts,
+              action: viewActions.PUSH
+            });
+            */
             return;
           }
 
@@ -1270,6 +1300,12 @@
           // If we are already transitioning, ignore this call
           if(transitionTracker.inProgress()) {
             console.debug("popView() View transitioin in progress. Ignoring this call");
+            /*
+            transitionQueue.push({
+              opts: opts,
+              action: viewActions.POP
+            });
+            */
             return;
           }
           if(viewStack.length < 2) {
