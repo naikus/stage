@@ -1,6 +1,6 @@
 {
   "name": "@naikus/stage",
-  "version": "1.0.2-beta",
+  "version": "1.0.3-beta",
   "homepage": "http://github.com/naikus/stage",
   "author": "aniketn3@gmail.com",
   "engines": {
@@ -27,7 +27,8 @@
     "example": "example"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx gulp build"
   },
   "repository": {
     "type": "git",
