@@ -1375,6 +1375,9 @@
         },
         getViewConfig: function(viewId) {
           return views[viewId].config;
+        },
+        getViewDefinition: function(viewId) {
+          return VIEW_DEFS[viewId];
         }
       };
 
