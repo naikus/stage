@@ -895,11 +895,13 @@
       }
       */
 
-      global.addEventListener("unload", function() {
-        for(var key in views) {
-          var view = views[key];
-          if(view && view.controller) {
-            view.controller.destroy();
+      global.addEventListener("pagehide", function(e) {
+        if(!e.persisted) {
+          for(var key in views) {
+            var view = views[key];
+            if(view && view.controller) {
+              view.controller.destroy();
+            }
           }
         }
       });
@@ -1395,16 +1397,15 @@
 
     /* ------------------------------------ Some static functions ------------------------------- */
 
-    Stage.defineView = function(viewId, factory) {
-      var options = viewId, template;
-      if(typeof options === "object") {
-        viewId = options.id;
-        factory = options.factory;
-        template = options.template;
-      }
+    Stage.defineView = function(viewDefn, config) {
+      var viewId = viewDefn.id,
+          viewFactory = viewDefn.factory,
+          template = viewDefn.template || `<div class="stage-view" data-view="${viewId}"></div>`,
+          viewCfg = config || {};
 
-      var def = getOrCreateViewDef(viewId);
-      def.factory = factory;
+      // console.log("Defining view", viewId, viewFactory, viewCfg);
+      var def = getOrCreateViewDef(viewId, viewCfg);
+      def.factory = viewFactory;
       def.template = template;
     };
 

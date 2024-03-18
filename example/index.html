@@ -158,23 +158,26 @@
         }
       });
 
-      Stage.defineView("two", function(view_context, viewUi) {
-        return {
-          initialize: function() {
-            document.getElementById("btn2").addEventListener(ACTION, function() {
-              stage.popView();
-            }, false);
-            document.getElementById("btn3").addEventListener(ACTION, function() {
-              view_context.pushView('three', {transition: 'slide-down'});
-            }, false);
-            viewUi.addEventListener("transitionin", function() {
-              viewUi.querySelector(".message").innerHTML = view_context.title();
-            });
-          },
-          activate(options) {
-            console.log(options);
-          }
-        };
+      Stage.defineView({
+        id: "two", 
+        factory: function(view_context, viewUi) {
+          return {
+            initialize: function() {
+              document.getElementById("btn2").addEventListener(ACTION, function() {
+                stage.popView();
+              }, false);
+              document.getElementById("btn3").addEventListener(ACTION, function() {
+                view_context.pushView('three', {transition: 'slide-down'});
+              }, false);
+              viewUi.addEventListener("transitionin", function() {
+                viewUi.querySelector(".message").innerHTML = view_context.title();
+              });
+            },
+            activate(options) {
+              console.log(options);
+            }
+          };
+        }
       });
 
       Stage.defineView({
