@@ -280,7 +280,7 @@
         for(var k in data) {
           event[k] = data[k];
         }
-        node.dispatchEvent(event);
+        return node.dispatchEvent(event);
       },
       hasClass: hasClass,
       addClass: function(element, clName) {
@@ -348,10 +348,14 @@
             }),
         Env = (function() {
           var prefixes = ["", "Webkit", "Moz", "O", "ms", "MS"],
-              transitionend = ["transitionend", "webkitTransitionEnd", "transitionend",
-                "oTransitionEnd", "MSTransitionEnd"],
-              animationend = ["animationend", "webkitAnimationEnd", "animationend",
-                "oAnimationEnd", "animationend"],
+              transitionend = [
+                "transitionend", "webkitTransitionEnd", "transitionend",
+                "oTransitionEnd", "MSTransitionEnd"
+              ],
+              animationend = [
+                "animationend", "webkitAnimationEnd", "animationend",
+                "oAnimationEnd", "animationend"
+              ],
               div = document.createElement("div"),
               style = div.style;
           return {
@@ -388,7 +392,8 @@
         })(),
         STAGE_DEFAULT_OPTIONS = {
           transitionDelay: 100,
-          transition: "slide"
+          transition: "slide",
+          debug: false
         },
         DEFAULT_VIEW_TEMPLATE = '<div class="stage-view"></div>',
         NO_TRANSITION = "no-transition",
@@ -873,38 +878,34 @@
       var options = Util.shallowCopy({}, STAGE_DEFAULT_OPTIONS, opts),
           viewPort = DOM.selectOne(options.viewport),
           views = {},
+          defaultTransition = options.transition,
           transitionTracker = TransitionTracker(),
           viewStack = [],
           context,
           instance;
 
-      console.debug("Stage options ", options);
+      if(opts.debug) {
+        console.debug("Stage options ", options);
+      }
 
       if(!viewPort || viewPort.nodeType !== 1) {
         throw new Error("Use a valid element as view port");
       }
 
-      var defaultTransition = options.transition;
-
-      /*
-      // @TODO This may not be necessary because pushViewInternal will set the default transition viewport class
-      if(defaultTransition) {
-        DOM.addClass(viewPort, defaultTransition);
-        // transitionState.transition = defaultTransition;
-        transitionTracker.name(defaultTransition);
-      }
-      */
-
       global.addEventListener("pagehide", function(e) {
         if(!e.persisted) {
-          for(var key in views) {
-            var view = views[key];
-            if(view && view.controller) {
-              view.controller.destroy();
-            }
-          }
+          destroyViews();
         }
       });
+
+      function destroyViews() {
+        for(var key in views) {
+          var view = views[key];
+          if(view && view.controller) {
+            view.controller.destroy();
+          }
+        }
+      }
 
       /**
        * Prepares the view from view definition (as defined by Stage.defineView()). This method
@@ -1147,14 +1148,14 @@
         }
       }
 
+      /*
       function dispatchViewLoad(type, viewId, error) {
-        // setTimeout(function() {
-          DOM.dispatchEvent("viewload" + type, {
-            element: viewPort,
-            data: {viewId: viewId, error: error}
-          });
-        // }, 1);
+        DOM.dispatchEvent("viewload" + type, {
+          element: viewPort,
+          data: {viewId: viewId, error: error}
+        });
       }
+      */
 
       function dispatchViewTransitionEvents(type, view) {
         DOM.dispatchEvent("viewtransition" + type, {
@@ -1171,7 +1172,7 @@
       function dispatchBeforeViewTransitionEvent(tType, view) {
         DOM.dispatchEvent("beforeviewtransition" + tType, {
           element: viewPort,
-          cancelable: true,
+          // cancelable: true,
           data: {
             viewId: view.id
           }
@@ -1269,6 +1270,7 @@
           // If we are already transitioning, ignore this call
           if(transitionTracker.inProgress()) {
             console.log("pushView() View transitioin in progress. Ignoring this call");
+            console.debug("Did you forget to define the transition in css?");
             /*
             transitionQueue.push({
               viewId: viewId,
@@ -1350,7 +1352,11 @@
               path,
               handleViewLoaded = function(viewData) {
                 callback({viewId: viewId, error: viewData.error, path: viewData.path});
-                dispatchViewLoad("end", viewId, viewData.error);
+                // dispatchViewLoad("end", viewId, viewData.error);
+                DOM.dispatchEvent("viewloadend", {
+                  element: viewPort,
+                  data: {viewId: viewId, error: viewData.error}
+                });
               };
           if(!viewDef) {
             var err = new Error("View not defined: " + viewId);
@@ -1358,7 +1364,11 @@
             return;
           }
           if(!viewDef.factory) { // We have a possibly remote view
-            dispatchViewLoad("start", viewId);
+            // dispatchViewLoad("start", viewId);
+            DOM.dispatchEvent("viewloadstart", {
+              element: viewPort,
+              data: {viewId: viewId}
+            });
             path = viewDef.path;
             if(JS_EXPR.test(path)) {
               loadJsView(viewDef, viewPort, handleViewLoaded);
@@ -1380,6 +1390,12 @@
         },
         getViewDefinition: function(viewId) {
           return VIEW_DEFS[viewId];
+        },
+        destroy: function() {
+          destroyViews();
+          views = {};
+          viewStack = [];
+          viewPort.innerHTML = "";
         }
       };
 
@@ -1400,7 +1416,7 @@
     Stage.defineView = function(viewDefn, config) {
       var viewId = viewDefn.id,
           viewFactory = viewDefn.factory,
-          template = viewDefn.template || `<div class="stage-view" data-view="${viewId}"></div>`,
+          template = viewDefn.template || '<div class="stage-view" data-view="' + viewId + '"></div>',
           viewCfg = config || {};
 
       // console.log("Defining view", viewId, viewFactory, viewCfg);

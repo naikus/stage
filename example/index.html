@@ -125,7 +125,7 @@
       </div>
       <div class="stage-view two" data-view="two">
         <h1>View Two</h1>
-        <p>Shows message below that can be passed from an external context.</p>
+        <p>Shows usage of cutom context. In this case a custom title() function is called.</p>
         <button class="btn" id="btn2">&#171;</button>
         <button class="btn" id="btn3">&#187;</button>
         <p class="message"></p>
@@ -148,11 +148,20 @@
       Stage.defineView({
         id: "one", 
         factory: function(view_context, viewUi) {
+          function handleTransitionOut(e) {
+            // do somethng
+          }
           return {
             initialize: function() {
               document.getElementById("btn1").addEventListener(ACTION, function() {
                 view_context.pushView('two', {transition: 'slide-up'/*, replace: true */});
               }, false);
+
+              viewUi.addEventListener("beforetransitionout", handleTransitionOut);
+            },
+            destroy: function() {
+              console.log("Destroying all views");
+              viewUi.removeEventListener("beforetransitionout", handleTransitionOut);
             }
           };
         }
@@ -198,15 +207,15 @@
                 view_context.pushView('four');
               }, false);
             },
-            activate: function(options /*, done */) {
+            activate: function(options, done) {
               actionbar.innerHTML = "Loading...";
               // Simulate delay (Should not affect transition smoothness)
-              /*
+              // /*
               setTimeout(function() {
                 // Tell the stage that we are done
                 done();
               }, 200);
-              */
+              // */
             }
           };
         }
