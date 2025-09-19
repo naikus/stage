@@ -1,6 +1,6 @@
 {
   "name": "@naikus/stage",
-  "version": "1.0.6-beta",
+  "version": "1.0.7-beta",
   "homepage": "http://github.com/naikus/stage",
   "author": "aniketn3@gmail.com",
   "engines": {
@@ -8,17 +8,16 @@
   },
   "main": "src/stage.js",
   "devDependencies": {
-    "ansi-regex": ">=5.0.1",
     "del": "^3.0.0",
-    "eslint": "^7.32.0",
-    "gulp": "^4.0.2",
+    "eslint": "~9.35.0",
+    "gulp": "~5.0.1",
     "gulp-concat": "^2.6.1",
     "gulp-connect": "^5.7.0",
     "gulp-jshint": "^2.1.0",
-    "gulp-less": "^4.0.1",
+    "gulp-less": "~5.0.0",
     "gulp-terser": "^1.2.0",
     "gulp-uglify": "^3.0.1",
-    "jshint": "^2.13.4",
+    "jshint": "~2.13.6",
     "merge-stream": "^1.0.1",
     "yargs": "^15.3.1"
   },
