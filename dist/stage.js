@@ -16,7 +16,7 @@
   // All global variables that are used in stagejs
   var document = global.document,
       setTimeout = global.setTimeout,
-      setInterval = global.setInterval,
+      // setInterval = global.setInterval,
       XMLHttpRequest = global.XMLHttpRequest,
       getComputedStyle = global.getComputedStyle,
       requestAnimationFrame = global.requestAnimationFrame;
