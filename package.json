@@ -3,31 +3,21 @@
   "version": "1.0.7-beta",
   "homepage": "http://github.com/naikus/stage",
   "author": "aniketn3@gmail.com",
-  "engines": {
-    "node": ">= 0.10.0"
+  "bugs": {
+    "url": "https://github.com/naikus/stage/issues"
   },
+  "files": [
+    "dist"
+  ],
   "main": "src/stage.js",
-  "devDependencies": {
-    "del": "^3.0.0",
-    "eslint": "~9.35.0",
-    "gulp": "~5.0.1",
-    "gulp-concat": "^2.6.1",
-    "gulp-connect": "^5.7.0",
-    "gulp-jshint": "^2.1.0",
-    "gulp-less": "~5.0.0",
-    "gulp-terser": "^1.2.0",
-    "gulp-uglify": "^3.0.1",
-    "jshint": "~2.13.6",
-    "merge-stream": "^1.0.1",
-    "yargs": "^15.3.1"
-  },
   "description": "Check out the live [demo](https://codepen.io/naikus/project/full/AzkkER)  (POC uses plain javascript and HTML)",
   "directories": {
     "example": "example"
   },
-  "scripts": {
+"scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx gulp build"
+    "build": "npx terser src/stage.js --ie8 -o dist/stage.js & npx lessc src/stage.less dist/stage.css",
+    "example": "npx shx cp src/stage.js example/js/stage.js & npx lessc src/stage.less example/css/stage.css & npx http-server ./example"
   },
   "repository": {
     "type": "git",
@@ -44,7 +34,10 @@
     "mobile-library"
   ],
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/naikus/stage/issues"
+  "devDependencies": {
+    "eslint": "^10.2.0",
+    "less": "^4.6.4",
+    "shx": "^0.4.0",
+    "terser": "^5.46.1"
   }
 }

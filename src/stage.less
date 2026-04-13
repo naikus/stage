@@ -122,7 +122,7 @@
     }
 
     &.in {
-      .transformNone;
+      .transformNone();
       // opacity: 1;
     }
 
@@ -169,7 +169,7 @@
       .translate(100%);
     }
     &.in {
-      .transformNone;
+      .transformNone();
     }
     &.stack {
       .translateAndScale(-70%, 0, 0, 0.8, 0.8);
@@ -196,7 +196,7 @@
 
     &.in {
       // .translateY(0); Fixed position elements won't work with this
-      .transformNone;
+      .transformNone();
       opacity: 1;
     }
 
@@ -220,7 +220,7 @@
       .translate(0, 100%);
     }
     &.in {
-      .transformNone;
+      .transformNone();
     }
     &.stack {
       .translateAndScale(0, -10px, 0, 0.98, 0.98);
@@ -240,7 +240,7 @@
       .translate(0, -100%);
     }
     &.in {
-      .transformNone;
+      .transformNone();
     }
     &.stack {
       .translateAndScale(0, 10px, 0, 0.98, 0.98);
@@ -261,7 +261,7 @@
     transition: transform 400ms cubic-bezier(0.19, 1, 0.22, 1) 100ms, opacity 500ms ease;
 
     &.in {
-      .transformNone;
+      .transformNone();
       opacity: 1;
     }
     &.stack {
